@@ -5,7 +5,7 @@
 package db
 
 import (
-	"github.com/jackc/pgx/v5/pgtype"
+	"time"
 )
 
 type Role struct {
@@ -21,14 +21,14 @@ type User struct {
 	RoleID       int64
 	IsActive     bool
 	IsVerified   bool
-	CreatedAt    pgtype.Timestamptz
-	UpdatedAt    pgtype.Timestamptz
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 type UserToken struct {
 	ID           int64
 	UserID       int64
 	RefreshToken string
-	ExpiresAt    pgtype.Timestamptz
-	CreatedAt    pgtype.Timestamptz
+	ExpiresAt    time.Time
+	CreatedAt    time.Time
 }

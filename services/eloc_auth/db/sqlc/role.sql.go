@@ -11,21 +11,19 @@ import (
 
 const createRole = `-- name: CreateRole :one
 INSERT INTO roles (
-  id,
   name
 ) VALUES (
-  $1, $2
+  $1
 )
 RETURNING id, name
 `
 
 type CreateRoleParams struct {
-	ID   int64
 	Name string
 }
 
 func (q *Queries) CreateRole(ctx context.Context, arg CreateRoleParams) (Role, error) {
-	row := q.db.QueryRow(ctx, createRole, arg.ID, arg.Name)
+	row := q.db.QueryRowContext(ctx, createRole, arg.Name)
 	var i Role
 	err := row.Scan(&i.ID, &i.Name)
 	return i, err
@@ -36,8 +34,12 @@ DELETE FROM roles
 WHERE id = $1
 `
 
-func (q *Queries) DeleteRole(ctx context.Context, id int64) error {
-	_, err := q.db.Exec(ctx, deleteRole, id)
+type DeleteRoleParams struct {
+	ID int64
+}
+
+func (q *Queries) DeleteRole(ctx context.Context, arg DeleteRoleParams) error {
+	_, err := q.db.ExecContext(ctx, deleteRole, arg.ID)
 	return err
 }
 
@@ -46,8 +48,12 @@ SELECT id, name FROM roles
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetRole(ctx context.Context, id int64) (Role, error) {
-	row := q.db.QueryRow(ctx, getRole, id)
+type GetRoleParams struct {
+	ID int64
+}
+
+func (q *Queries) GetRole(ctx context.Context, arg GetRoleParams) (Role, error) {
+	row := q.db.QueryRowContext(ctx, getRole, arg.ID)
 	var i Role
 	err := row.Scan(&i.ID, &i.Name)
 	return i, err
@@ -56,10 +62,17 @@ func (q *Queries) GetRole(ctx context.Context, id int64) (Role, error) {
 const listRoles = `-- name: ListRoles :many
 SELECT id, name FROM roles
 ORDER BY name
+LIMIT $1
+OFFSET $2
 `
 
-func (q *Queries) ListRoles(ctx context.Context) ([]Role, error) {
-	rows, err := q.db.Query(ctx, listRoles)
+type ListRolesParams struct {
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) ListRoles(ctx context.Context, arg ListRolesParams) ([]Role, error) {
+	rows, err := q.db.QueryContext(ctx, listRoles, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -72,6 +85,9 @@ func (q *Queries) ListRoles(ctx context.Context) ([]Role, error) {
 		}
 		items = append(items, i)
 	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
@@ -82,6 +98,7 @@ const updateRole = `-- name: UpdateRole :exec
 UPDATE roles
 set name = $2
 WHERE id = $1
+RETURNING id, name
 `
 
 type UpdateRoleParams struct {
@@ -90,6 +107,6 @@ type UpdateRoleParams struct {
 }
 
 func (q *Queries) UpdateRole(ctx context.Context, arg UpdateRoleParams) error {
-	_, err := q.db.Exec(ctx, updateRole, arg.ID, arg.Name)
+	_, err := q.db.ExecContext(ctx, updateRole, arg.ID, arg.Name)
 	return err
 }
