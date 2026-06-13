@@ -7,8 +7,7 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
+	"time"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -30,7 +29,7 @@ type CreateUserParams struct {
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, createUser,
+	row := q.db.QueryRowContext(ctx, createUser,
 		arg.Email,
 		arg.PasswordHash,
 		arg.Fullname,
@@ -58,8 +57,12 @@ DELETE FROM users
 WHERE id = $1
 `
 
-func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
-	_, err := q.db.Exec(ctx, deleteUser, id)
+type DeleteUserParams struct {
+	ID int64
+}
+
+func (q *Queries) DeleteUser(ctx context.Context, arg DeleteUserParams) error {
+	_, err := q.db.ExecContext(ctx, deleteUser, arg.ID)
 	return err
 }
 
@@ -69,8 +72,12 @@ FROM users
 WHERE email = $1 LIMIT 1
 `
 
-func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
-	row := q.db.QueryRow(ctx, getUserByEmail, email)
+type GetUserByEmailParams struct {
+	Email string
+}
+
+func (q *Queries) GetUserByEmail(ctx context.Context, arg GetUserByEmailParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByEmail, arg.Email)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -92,8 +99,12 @@ FROM users
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetUserById(ctx context.Context, id int64) (User, error) {
-	row := q.db.QueryRow(ctx, getUserById, id)
+type GetUserByIdParams struct {
+	ID int64
+}
+
+func (q *Queries) GetUserById(ctx context.Context, arg GetUserByIdParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserById, arg.ID)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -129,12 +140,12 @@ type ListUsersRow struct {
 	RoleID     int64
 	IsActive   bool
 	IsVerified bool
-	CreatedAt  pgtype.Timestamptz
-	UpdatedAt  pgtype.Timestamptz
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }
 
 func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]ListUsersRow, error) {
-	rows, err := q.db.Query(ctx, listUsers, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listUsers, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -155,6 +166,9 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]ListUse
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -185,12 +199,12 @@ type UpdateUserDetailRow struct {
 	RoleID     int64
 	IsActive   bool
 	IsVerified bool
-	CreatedAt  pgtype.Timestamptz
-	UpdatedAt  pgtype.Timestamptz
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }
 
 func (q *Queries) UpdateUserDetail(ctx context.Context, arg UpdateUserDetailParams) (UpdateUserDetailRow, error) {
-	row := q.db.QueryRow(ctx, updateUserDetail, arg.ID, arg.Fullname, arg.RoleID)
+	row := q.db.QueryRowContext(ctx, updateUserDetail, arg.ID, arg.Fullname, arg.RoleID)
 	var i UpdateUserDetailRow
 	err := row.Scan(
 		&i.ID,
@@ -221,6 +235,6 @@ type UpdateUserStatusParams struct {
 }
 
 func (q *Queries) UpdateUserStatus(ctx context.Context, arg UpdateUserStatusParams) error {
-	_, err := q.db.Exec(ctx, updateUserStatus, arg.ID, arg.IsActive, arg.IsVerified)
+	_, err := q.db.ExecContext(ctx, updateUserStatus, arg.ID, arg.IsActive, arg.IsVerified)
 	return err
 }
