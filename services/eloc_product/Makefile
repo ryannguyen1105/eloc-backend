@@ -5,3 +5,6 @@ migrateup:
 
 migratedown:
 	migrate -path db/migration -database $(DB_Source_Local) -verbose down
+
+sqlc:
+	sqlc generate
