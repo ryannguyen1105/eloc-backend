@@ -26,7 +26,7 @@ type CreateOrderItemParams struct {
 }
 
 func (q *Queries) CreateOrderItem(ctx context.Context, arg CreateOrderItemParams) (OrderItem, error) {
-	row := q.db.QueryRow(ctx, createOrderItem,
+	row := q.db.QueryRowContext(ctx, createOrderItem,
 		arg.OrderID,
 		arg.ProductID,
 		arg.Quantity,
@@ -54,7 +54,7 @@ type GetOrderItemsParams struct {
 }
 
 func (q *Queries) GetOrderItems(ctx context.Context, arg GetOrderItemsParams) ([]OrderItem, error) {
-	rows, err := q.db.Query(ctx, getOrderItems, arg.OrderID)
+	rows, err := q.db.QueryContext(ctx, getOrderItems, arg.OrderID)
 	if err != nil {
 		return nil, err
 	}
@@ -72,6 +72,9 @@ func (q *Queries) GetOrderItems(ctx context.Context, arg GetOrderItemsParams) ([
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

@@ -1,9 +1,11 @@
 CREATE TABLE "carts" (
-  "id" bigserial PRIMARY KEY,
   "user_id" bigint NOT NULL,
   "product_id" bigint NOT NULL,
   "quantity" bigint NOT NULL DEFAULT 1,
-  "updated_at" timestamptz NOT NULL DEFAULT (now())
+  "created_at" timestamptz NOT NULL DEFAULT (now()),
+  "updated_at" timestamptz NOT NULL DEFAULT (now()),
+
+  PRIMARY KEY (user_id, product_id)
 );
 
 CREATE TABLE "orders" (

@@ -7,8 +7,7 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
+	"time"
 )
 
 const createOrder = `-- name: CreateOrder :one
@@ -29,7 +28,7 @@ type CreateOrderParams struct {
 }
 
 func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error) {
-	row := q.db.QueryRow(ctx, createOrder,
+	row := q.db.QueryRowContext(ctx, createOrder,
 		arg.UserID,
 		arg.TotalAmount,
 		arg.Status,
@@ -60,7 +59,7 @@ type GetOrderParams struct {
 }
 
 func (q *Queries) GetOrder(ctx context.Context, arg GetOrderParams) (Order, error) {
-	row := q.db.QueryRow(ctx, getOrder, arg.ID)
+	row := q.db.QueryRowContext(ctx, getOrder, arg.ID)
 	var i Order
 	err := row.Scan(
 		&i.ID,
@@ -76,26 +75,30 @@ func (q *Queries) GetOrder(ctx context.Context, arg GetOrderParams) (Order, erro
 }
 
 const listUserOrders = `-- name: ListUserOrders :many
-SELECT id, total_amount, status, shipping_address, customer_phone, created_at FROM orders
+SELECT id, user_id, total_amount, status, shipping_address, customer_phone, created_at FROM orders
 WHERE user_id = $1
 ORDER BY created_at DESC
+LIMIT $2 OFFSET $3
 `
 
 type ListUserOrdersParams struct {
 	UserID int64
+	Limit  int32
+	Offset int32
 }
 
 type ListUserOrdersRow struct {
 	ID              int64
+	UserID          int64
 	TotalAmount     int64
 	Status          string
 	ShippingAddress string
 	CustomerPhone   string
-	CreatedAt       pgtype.Timestamptz
+	CreatedAt       time.Time
 }
 
 func (q *Queries) ListUserOrders(ctx context.Context, arg ListUserOrdersParams) ([]ListUserOrdersRow, error) {
-	rows, err := q.db.Query(ctx, listUserOrders, arg.UserID)
+	rows, err := q.db.QueryContext(ctx, listUserOrders, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -105,6 +108,7 @@ func (q *Queries) ListUserOrders(ctx context.Context, arg ListUserOrdersParams) 
 		var i ListUserOrdersRow
 		if err := rows.Scan(
 			&i.ID,
+			&i.UserID,
 			&i.TotalAmount,
 			&i.Status,
 			&i.ShippingAddress,
@@ -114,6 +118,9 @@ func (q *Queries) ListUserOrders(ctx context.Context, arg ListUserOrdersParams) 
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -138,11 +145,11 @@ type UpdateOrderStatusParams struct {
 type UpdateOrderStatusRow struct {
 	ID        int64
 	Status    string
-	UpdatedAt pgtype.Timestamptz
+	UpdatedAt time.Time
 }
 
 func (q *Queries) UpdateOrderStatus(ctx context.Context, arg UpdateOrderStatusParams) (UpdateOrderStatusRow, error) {
-	row := q.db.QueryRow(ctx, updateOrderStatus, arg.ID, arg.Status)
+	row := q.db.QueryRowContext(ctx, updateOrderStatus, arg.ID, arg.Status)
 	var i UpdateOrderStatusRow
 	err := row.Scan(&i.ID, &i.Status, &i.UpdatedAt)
 	return i, err

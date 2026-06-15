@@ -95,3 +95,25 @@ func RandomPrice() int64 {
 func RandomUrl() string {
 	return "https://" + RandomAlphabet(10) + ".com/image.jpg"
 }
+
+func RandomUserID() int64 {
+	return RandomNumberInt(2)
+}
+
+func RandomProductID() int64 {
+	return RandomNumberInt(2)
+}
+
+func RandomStatus() string {
+	status := []string{"PENDING", "SHIPPING", "DELIVERED"}
+	n := len(status)
+	return status[rand.Intn(n)]
+}
+
+func RandomAddress() string {
+	return RandomAlphabet(20)
+}
+
+func RandomPhone() string {
+	return "0" + RandomNumberString(9)
+}

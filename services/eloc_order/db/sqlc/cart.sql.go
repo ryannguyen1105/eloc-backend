@@ -19,7 +19,7 @@ type ClearUserCartParams struct {
 }
 
 func (q *Queries) ClearUserCart(ctx context.Context, arg ClearUserCartParams) error {
-	_, err := q.db.Exec(ctx, clearUserCart, arg.UserID)
+	_, err := q.db.ExecContext(ctx, clearUserCart, arg.UserID)
 	return err
 }
 
@@ -33,7 +33,7 @@ ON CONFLICT (user_id, product_id)
 DO UPDATE SET 
 quantity = carts.quantity + EXCLUDED.quantity,
 updated_at = now()
-RETURNING id, user_id, product_id, quantity, updated_at
+RETURNING user_id, product_id, quantity, created_at, updated_at
 `
 
 type CreateCartParams struct {
@@ -43,20 +43,20 @@ type CreateCartParams struct {
 }
 
 func (q *Queries) CreateCart(ctx context.Context, arg CreateCartParams) (Cart, error) {
-	row := q.db.QueryRow(ctx, createCart, arg.UserID, arg.ProductID, arg.Quantity)
+	row := q.db.QueryRowContext(ctx, createCart, arg.UserID, arg.ProductID, arg.Quantity)
 	var i Cart
 	err := row.Scan(
-		&i.ID,
 		&i.UserID,
 		&i.ProductID,
 		&i.Quantity,
+		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const getUserCart = `-- name: GetUserCart :many
-SELECT id, user_id, product_id, quantity, updated_at FROM carts
+SELECT user_id, product_id, quantity, created_at, updated_at FROM carts
 WHERE user_id = $1
 ORDER BY updated_at DESC
 `
@@ -66,7 +66,7 @@ type GetUserCartParams struct {
 }
 
 func (q *Queries) GetUserCart(ctx context.Context, arg GetUserCartParams) ([]Cart, error) {
-	rows, err := q.db.Query(ctx, getUserCart, arg.UserID)
+	rows, err := q.db.QueryContext(ctx, getUserCart, arg.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -75,15 +75,18 @@ func (q *Queries) GetUserCart(ctx context.Context, arg GetUserCartParams) ([]Car
 	for rows.Next() {
 		var i Cart
 		if err := rows.Scan(
-			&i.ID,
 			&i.UserID,
 			&i.ProductID,
 			&i.Quantity,
+			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -102,7 +105,7 @@ type RemoveFromCartParams struct {
 }
 
 func (q *Queries) RemoveFromCart(ctx context.Context, arg RemoveFromCartParams) error {
-	_, err := q.db.Exec(ctx, removeFromCart, arg.UserID, arg.ProductID)
+	_, err := q.db.ExecContext(ctx, removeFromCart, arg.UserID, arg.ProductID)
 	return err
 }
 
@@ -112,7 +115,7 @@ SET
 quantity = $3,
 updated_at = now()
 WHERE user_id = $1 AND product_id = $2
-RETURNING id, user_id, product_id, quantity, updated_at
+RETURNING user_id, product_id, quantity, created_at, updated_at
 `
 
 type UpdateCartQuantityParams struct {
@@ -122,13 +125,13 @@ type UpdateCartQuantityParams struct {
 }
 
 func (q *Queries) UpdateCartQuantity(ctx context.Context, arg UpdateCartQuantityParams) (Cart, error) {
-	row := q.db.QueryRow(ctx, updateCartQuantity, arg.UserID, arg.ProductID, arg.Quantity)
+	row := q.db.QueryRowContext(ctx, updateCartQuantity, arg.UserID, arg.ProductID, arg.Quantity)
 	var i Cart
 	err := row.Scan(
-		&i.ID,
 		&i.UserID,
 		&i.ProductID,
 		&i.Quantity,
+		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err

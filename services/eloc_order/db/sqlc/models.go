@@ -5,15 +5,15 @@
 package db
 
 import (
-	"github.com/jackc/pgx/v5/pgtype"
+	"time"
 )
 
 type Cart struct {
-	ID        int64
 	UserID    int64
 	ProductID int64
 	Quantity  int64
-	UpdatedAt pgtype.Timestamptz
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type Order struct {
@@ -24,8 +24,8 @@ type Order struct {
 	Status          string
 	ShippingAddress string
 	CustomerPhone   string
-	CreatedAt       pgtype.Timestamptz
-	UpdatedAt       pgtype.Timestamptz
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 }
 
 type OrderItem struct {

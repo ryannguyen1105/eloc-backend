@@ -11,9 +11,10 @@ SELECT * FROM orders
 WHERE id = $1 LIMIT 1;
 
 -- name: ListUserOrders :many
-SELECT id, total_amount, status, shipping_address, customer_phone, created_at FROM orders
+SELECT id, user_id, total_amount, status, shipping_address, customer_phone, created_at FROM orders
 WHERE user_id = $1
-ORDER BY created_at DESC;
+ORDER BY created_at DESC
+LIMIT $2 OFFSET $3;
 
 -- name: UpdateOrderStatus :one
 UPDATE orders
