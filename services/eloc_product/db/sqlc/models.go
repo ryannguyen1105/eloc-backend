@@ -5,7 +5,9 @@
 package db
 
 import (
-	"github.com/jackc/pgx/v5/pgtype"
+	"time"
+
+	"github.com/sqlc-dev/pqtype"
 )
 
 type Category struct {
@@ -22,9 +24,9 @@ type Product struct {
 	Sku        string
 	Price      int64
 	Stock      int32
-	Attributes []byte
-	CreatedAt  pgtype.Timestamptz
-	UpdatedAt  pgtype.Timestamptz
+	Attributes pqtype.NullRawMessage
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }
 
 type ProductImage struct {

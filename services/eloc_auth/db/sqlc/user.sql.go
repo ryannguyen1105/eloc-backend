@@ -93,18 +93,18 @@ func (q *Queries) GetUserByEmail(ctx context.Context, arg GetUserByEmailParams) 
 	return i, err
 }
 
-const getUserById = `-- name: GetUserById :one
+const getUserByID = `-- name: GetUserByID :one
 SELECT id, email, password_hash, fullname, role_id, is_active, is_verified, created_at, updated_at
 FROM users
 WHERE id = $1 LIMIT 1
 `
 
-type GetUserByIdParams struct {
+type GetUserByIDParams struct {
 	ID int64
 }
 
-func (q *Queries) GetUserById(ctx context.Context, arg GetUserByIdParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserById, arg.ID)
+func (q *Queries) GetUserByID(ctx context.Context, arg GetUserByIDParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByID, arg.ID)
 	var i User
 	err := row.Scan(
 		&i.ID,

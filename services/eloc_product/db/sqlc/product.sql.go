@@ -7,8 +7,9 @@ package db
 
 import (
 	"context"
+	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/sqlc-dev/pqtype"
 )
 
 const createProduct = `-- name: CreateProduct :one
@@ -27,11 +28,11 @@ type CreateProductParams struct {
 	Sku        string
 	Price      int64
 	Stock      int32
-	Attributes []byte
+	Attributes pqtype.NullRawMessage
 }
 
 func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error) {
-	row := q.db.QueryRow(ctx, createProduct,
+	row := q.db.QueryRowContext(ctx, createProduct,
 		arg.CategoryID,
 		arg.Name,
 		arg.Slug,
@@ -61,19 +62,27 @@ DELETE FROM products
 WHERE id = $1
 `
 
-func (q *Queries) DeleteProduct(ctx context.Context, id int64) error {
-	_, err := q.db.Exec(ctx, deleteProduct, id)
+type DeleteProductParams struct {
+	ID int64
+}
+
+func (q *Queries) DeleteProduct(ctx context.Context, arg DeleteProductParams) error {
+	_, err := q.db.ExecContext(ctx, deleteProduct, arg.ID)
 	return err
 }
 
-const getProductById = `-- name: GetProductById :one
+const getProductByID = `-- name: GetProductByID :one
 SELECT id, category_id, name, slug, sku, price, stock, attributes, created_at, updated_at
 FROM products
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetProductById(ctx context.Context, id int64) (Product, error) {
-	row := q.db.QueryRow(ctx, getProductById, id)
+type GetProductByIDParams struct {
+	ID int64
+}
+
+func (q *Queries) GetProductByID(ctx context.Context, arg GetProductByIDParams) (Product, error) {
+	row := q.db.QueryRowContext(ctx, getProductByID, arg.ID)
 	var i Product
 	err := row.Scan(
 		&i.ID,
@@ -96,8 +105,12 @@ FROM products
 WHERE slug = $1 LIMIT 1
 `
 
-func (q *Queries) GetProductBySlug(ctx context.Context, slug string) (Product, error) {
-	row := q.db.QueryRow(ctx, getProductBySlug, slug)
+type GetProductBySlugParams struct {
+	Slug string
+}
+
+func (q *Queries) GetProductBySlug(ctx context.Context, arg GetProductBySlugParams) (Product, error) {
+	row := q.db.QueryRowContext(ctx, getProductBySlug, arg.Slug)
 	var i Product
 	err := row.Scan(
 		&i.ID,
@@ -134,11 +147,11 @@ type ListProductsRow struct {
 	Sku        string
 	Price      int64
 	Stock      int32
-	CreatedAt  pgtype.Timestamptz
+	CreatedAt  time.Time
 }
 
 func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]ListProductsRow, error) {
-	rows, err := q.db.Query(ctx, listProducts, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listProducts, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -159,6 +172,9 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]L
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -188,11 +204,11 @@ type ListProductsByCategoryRow struct {
 	Sku        string
 	Price      int64
 	Stock      int32
-	CreatedAt  pgtype.Timestamptz
+	CreatedAt  time.Time
 }
 
 func (q *Queries) ListProductsByCategory(ctx context.Context, arg ListProductsByCategoryParams) ([]ListProductsByCategoryRow, error) {
-	rows, err := q.db.Query(ctx, listProductsByCategory, arg.CategoryID, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listProductsByCategory, arg.CategoryID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -213,6 +229,9 @@ func (q *Queries) ListProductsByCategory(ctx context.Context, arg ListProductsBy
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -243,7 +262,7 @@ type UpdateProductParams struct {
 	Sku        string
 	Price      int64
 	Stock      int32
-	Attributes []byte
+	Attributes pqtype.NullRawMessage
 }
 
 type UpdateProductRow struct {
@@ -254,12 +273,12 @@ type UpdateProductRow struct {
 	Sku        string
 	Price      int64
 	Stock      int32
-	Attributes []byte
-	UpdatedAt  pgtype.Timestamptz
+	Attributes pqtype.NullRawMessage
+	UpdatedAt  time.Time
 }
 
 func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) (UpdateProductRow, error) {
-	row := q.db.QueryRow(ctx, updateProduct,
+	row := q.db.QueryRowContext(ctx, updateProduct,
 		arg.ID,
 		arg.CategoryID,
 		arg.Name,
@@ -305,7 +324,7 @@ type UpdateProductStockRow struct {
 }
 
 func (q *Queries) UpdateProductStock(ctx context.Context, arg UpdateProductStockParams) (UpdateProductStockRow, error) {
-	row := q.db.QueryRow(ctx, updateProductStock, arg.ID, arg.Stock)
+	row := q.db.QueryRowContext(ctx, updateProductStock, arg.ID, arg.Stock)
 	var i UpdateProductStockRow
 	err := row.Scan(&i.ID, &i.Name, &i.Stock)
 	return i, err

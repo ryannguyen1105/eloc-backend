@@ -25,7 +25,7 @@ type AddProductImageParams struct {
 }
 
 func (q *Queries) AddProductImage(ctx context.Context, arg AddProductImageParams) (ProductImage, error) {
-	row := q.db.QueryRow(ctx, addProductImage, arg.ProductID, arg.ImageUrl, arg.IsPrimary)
+	row := q.db.QueryRowContext(ctx, addProductImage, arg.ProductID, arg.ImageUrl, arg.IsPrimary)
 	var i ProductImage
 	err := row.Scan(
 		&i.ID,
@@ -47,7 +47,7 @@ type DeleteProductImageParams struct {
 }
 
 func (q *Queries) DeleteProductImage(ctx context.Context, arg DeleteProductImageParams) error {
-	_, err := q.db.Exec(ctx, deleteProductImage, arg.ID, arg.ProductID)
+	_, err := q.db.ExecContext(ctx, deleteProductImage, arg.ID, arg.ProductID)
 	return err
 }
 
@@ -58,8 +58,12 @@ WHERE product_id = $1
 ORDER BY is_primary DESC, id ASC
 `
 
-func (q *Queries) GetProductImages(ctx context.Context, productID int64) ([]ProductImage, error) {
-	rows, err := q.db.Query(ctx, getProductImages, productID)
+type GetProductImagesParams struct {
+	ProductID int64
+}
+
+func (q *Queries) GetProductImages(ctx context.Context, arg GetProductImagesParams) ([]ProductImage, error) {
+	rows, err := q.db.QueryContext(ctx, getProductImages, arg.ProductID)
 	if err != nil {
 		return nil, err
 	}
@@ -77,6 +81,9 @@ func (q *Queries) GetProductImages(ctx context.Context, productID int64) ([]Prod
 		}
 		items = append(items, i)
 	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
@@ -89,8 +96,12 @@ SET is_primary = false
 WHERE product_id = $1
 `
 
-func (q *Queries) ResetPrimaryImage(ctx context.Context, productID int64) error {
-	_, err := q.db.Exec(ctx, resetPrimaryImage, productID)
+type ResetPrimaryImageParams struct {
+	ProductID int64
+}
+
+func (q *Queries) ResetPrimaryImage(ctx context.Context, arg ResetPrimaryImageParams) error {
+	_, err := q.db.ExecContext(ctx, resetPrimaryImage, arg.ProductID)
 	return err
 }
 
@@ -107,7 +118,7 @@ type SetPrimaryImageParams struct {
 }
 
 func (q *Queries) SetPrimaryImage(ctx context.Context, arg SetPrimaryImageParams) (ProductImage, error) {
-	row := q.db.QueryRow(ctx, setPrimaryImage, arg.ID, arg.ProductID)
+	row := q.db.QueryRowContext(ctx, setPrimaryImage, arg.ID, arg.ProductID)
 	var i ProductImage
 	err := row.Scan(
 		&i.ID,

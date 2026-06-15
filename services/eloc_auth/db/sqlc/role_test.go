@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/ryannguyen1105/eloc-backend/services/eloc_auth/util"
+	"github.com/ryannguyen1105/eloc-backend/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -53,7 +53,7 @@ func TestUpdateRole(t *testing.T) {
 
 	require.NoError(t, err)
 
-	arg := GetRoleParams {
+	arg := GetRoleParams{
 		ID: role1.ID,
 	}
 
@@ -67,19 +67,19 @@ func TestUpdateRole(t *testing.T) {
 
 func TestDeleteRole(t *testing.T) {
 	role1 := createRandomRole(t)
-	
-	deleteArg := DeleteRoleParams {
+
+	deleteArg := DeleteRoleParams{
 		ID: role1.ID,
 	}
 
 	err := testQueries.DeleteRole(context.Background(), deleteArg)
 	require.NoError(t, err)
 
-	arg := GetRoleParams {
+	arg := GetRoleParams{
 		ID: role1.ID,
 	}
 
-	role2, err := testQueries.GetRole(context.Background(),arg )
+	role2, err := testQueries.GetRole(context.Background(), arg)
 	require.Error(t, err)
 	require.ErrorIs(t, err, sql.ErrNoRows)
 
@@ -91,8 +91,8 @@ func TestListRoles(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		createRandomRole(t)
 	}
-	arg := ListRolesParams {
-		Limit: 5,
+	arg := ListRolesParams{
+		Limit:  5,
 		Offset: 5,
 	}
 	roles, err := testQueries.ListRoles(context.Background(), arg)

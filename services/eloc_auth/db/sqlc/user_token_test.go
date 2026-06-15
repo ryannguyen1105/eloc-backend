@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ryannguyen1105/eloc-backend/services/eloc_auth/util"
+	"github.com/ryannguyen1105/eloc-backend/util"
 	"github.com/stretchr/testify/require"
 )
 
