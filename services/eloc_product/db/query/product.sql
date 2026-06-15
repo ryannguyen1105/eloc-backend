@@ -6,7 +6,7 @@ INSERT INTO products (
 )
 RETURNING id, category_id, name, slug, sku, price, stock, attributes, created_at, updated_at;
 
--- name: GetProductById :one
+-- name: GetProductByID :one
 SELECT id, category_id, name, slug, sku, price, stock, attributes, created_at, updated_at
 FROM products
 WHERE id = $1 LIMIT 1;

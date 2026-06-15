@@ -1,8 +1,8 @@
 -- name: CreateCategory :one
 INSERT INTO categories (
-  id, name , slug
+  name , slug
 ) VALUES (
-  $1, $2, $3
+  $1, $2
 )
 RETURNING *;
 
@@ -14,9 +14,11 @@ WHERE id = $1 LIMIT 1;
 SELECT * FROM categories
 WHERE slug = $1 LIMIT 1;
 
--- name: ListCategory :many
+-- name: ListCategories :many
 SELECT * FROM categories
-ORDER BY name;
+ORDER BY name
+LIMIT $1
+OFFSET $2;
 
 -- name: UpdateCategory :exec
 UPDATE categories

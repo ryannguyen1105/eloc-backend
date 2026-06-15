@@ -11,21 +11,20 @@ import (
 
 const createCategory = `-- name: CreateCategory :one
 INSERT INTO categories (
-  id, name , slug
+  name , slug
 ) VALUES (
-  $1, $2, $3
+  $1, $2
 )
 RETURNING id, name, slug
 `
 
 type CreateCategoryParams struct {
-	ID   int64
 	Name string
 	Slug string
 }
 
 func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) (Category, error) {
-	row := q.db.QueryRow(ctx, createCategory, arg.ID, arg.Name, arg.Slug)
+	row := q.db.QueryRowContext(ctx, createCategory, arg.Name, arg.Slug)
 	var i Category
 	err := row.Scan(&i.ID, &i.Name, &i.Slug)
 	return i, err
@@ -36,8 +35,12 @@ DELETE FROM categories
 WHERE id = $1
 `
 
-func (q *Queries) DeleteCategory(ctx context.Context, id int64) error {
-	_, err := q.db.Exec(ctx, deleteCategory, id)
+type DeleteCategoryParams struct {
+	ID int64
+}
+
+func (q *Queries) DeleteCategory(ctx context.Context, arg DeleteCategoryParams) error {
+	_, err := q.db.ExecContext(ctx, deleteCategory, arg.ID)
 	return err
 }
 
@@ -46,8 +49,12 @@ SELECT id, name, slug FROM categories
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetCategoryByID(ctx context.Context, id int64) (Category, error) {
-	row := q.db.QueryRow(ctx, getCategoryByID, id)
+type GetCategoryByIDParams struct {
+	ID int64
+}
+
+func (q *Queries) GetCategoryByID(ctx context.Context, arg GetCategoryByIDParams) (Category, error) {
+	row := q.db.QueryRowContext(ctx, getCategoryByID, arg.ID)
 	var i Category
 	err := row.Scan(&i.ID, &i.Name, &i.Slug)
 	return i, err
@@ -58,20 +65,31 @@ SELECT id, name, slug FROM categories
 WHERE slug = $1 LIMIT 1
 `
 
-func (q *Queries) GetCategoryBySlug(ctx context.Context, slug string) (Category, error) {
-	row := q.db.QueryRow(ctx, getCategoryBySlug, slug)
+type GetCategoryBySlugParams struct {
+	Slug string
+}
+
+func (q *Queries) GetCategoryBySlug(ctx context.Context, arg GetCategoryBySlugParams) (Category, error) {
+	row := q.db.QueryRowContext(ctx, getCategoryBySlug, arg.Slug)
 	var i Category
 	err := row.Scan(&i.ID, &i.Name, &i.Slug)
 	return i, err
 }
 
-const listCategory = `-- name: ListCategory :many
+const listCategories = `-- name: ListCategories :many
 SELECT id, name, slug FROM categories
 ORDER BY name
+LIMIT $1
+OFFSET $2
 `
 
-func (q *Queries) ListCategory(ctx context.Context) ([]Category, error) {
-	rows, err := q.db.Query(ctx, listCategory)
+type ListCategoriesParams struct {
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) ListCategories(ctx context.Context, arg ListCategoriesParams) ([]Category, error) {
+	rows, err := q.db.QueryContext(ctx, listCategories, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -83,6 +101,9 @@ func (q *Queries) ListCategory(ctx context.Context) ([]Category, error) {
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -104,6 +125,6 @@ type UpdateCategoryParams struct {
 }
 
 func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) error {
-	_, err := q.db.Exec(ctx, updateCategory, arg.ID, arg.Name, arg.Slug)
+	_, err := q.db.ExecContext(ctx, updateCategory, arg.ID, arg.Name, arg.Slug)
 	return err
 }

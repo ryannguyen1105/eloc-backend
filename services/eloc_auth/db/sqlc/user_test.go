@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ryannguyen1105/eloc-backend/services/eloc_auth/util"
+	"github.com/ryannguyen1105/eloc-backend/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -42,10 +42,10 @@ func TestCreateUser(t *testing.T) {
 func TestGetUserByID(t *testing.T) {
 	role := createRandomRole(t)
 	user1 := createRandomUser(t, role)
-	arg := GetUserByIdParams{
+	arg := GetUserByIDParams{
 		ID: user1.ID,
 	}
-	user2, err := testQueries.GetUserById(context.Background(), arg)
+	user2, err := testQueries.GetUserByID(context.Background(), arg)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, user2)
@@ -107,10 +107,10 @@ func TestUpdateUserStatus(t *testing.T) {
 	err := testQueries.UpdateUserStatus(context.Background(), arg)
 	require.NoError(t, err)
 	
-	getArg := GetUserByIdParams {
+	getArg := GetUserByIDParams {
 		ID: user1.ID,
 	}
-	user2, err := testQueries.GetUserById(context.Background(), getArg)
+	user2, err := testQueries.GetUserByID(context.Background(), getArg)
 	require.NoError(t, err)
 	require.NotEmpty(t, user2)
 
@@ -134,10 +134,10 @@ func TestDeleteUser(t *testing.T) {
 	err := testQueries.DeleteUser(context.Background(), deleteArg)
 	require.NoError(t, err)
 
-	arg := GetUserByIdParams{
+	arg := GetUserByIDParams{
 		ID: user1.ID,
 	}
-	user2, err := testQueries.GetUserById(context.Background(), arg)
+	user2, err := testQueries.GetUserByID(context.Background(), arg)
 	require.Error(t, err)
 	require.ErrorIs(t, err, sql.ErrNoRows)
 
