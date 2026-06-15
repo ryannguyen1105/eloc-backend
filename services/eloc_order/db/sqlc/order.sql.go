@@ -55,8 +55,12 @@ SELECT id, user_id, total_amount, status, shipping_address, customer_phone, crea
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetOrder(ctx context.Context, id int64) (Order, error) {
-	row := q.db.QueryRow(ctx, getOrder, id)
+type GetOrderParams struct {
+	ID int64
+}
+
+func (q *Queries) GetOrder(ctx context.Context, arg GetOrderParams) (Order, error) {
+	row := q.db.QueryRow(ctx, getOrder, arg.ID)
 	var i Order
 	err := row.Scan(
 		&i.ID,
@@ -77,6 +81,10 @@ WHERE user_id = $1
 ORDER BY created_at DESC
 `
 
+type ListUserOrdersParams struct {
+	UserID int64
+}
+
 type ListUserOrdersRow struct {
 	ID              int64
 	TotalAmount     int64
@@ -86,8 +94,8 @@ type ListUserOrdersRow struct {
 	CreatedAt       pgtype.Timestamptz
 }
 
-func (q *Queries) ListUserOrders(ctx context.Context, userID int64) ([]ListUserOrdersRow, error) {
-	rows, err := q.db.Query(ctx, listUserOrders, userID)
+func (q *Queries) ListUserOrders(ctx context.Context, arg ListUserOrdersParams) ([]ListUserOrdersRow, error) {
+	rows, err := q.db.Query(ctx, listUserOrders, arg.UserID)
 	if err != nil {
 		return nil, err
 	}

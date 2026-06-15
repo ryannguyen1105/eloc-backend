@@ -49,8 +49,12 @@ FROM order_items
 WHERE order_id = $1
 `
 
-func (q *Queries) GetOrderItems(ctx context.Context, orderID int64) ([]OrderItem, error) {
-	rows, err := q.db.Query(ctx, getOrderItems, orderID)
+type GetOrderItemsParams struct {
+	OrderID int64
+}
+
+func (q *Queries) GetOrderItems(ctx context.Context, arg GetOrderItemsParams) ([]OrderItem, error) {
+	rows, err := q.db.Query(ctx, getOrderItems, arg.OrderID)
 	if err != nil {
 		return nil, err
 	}

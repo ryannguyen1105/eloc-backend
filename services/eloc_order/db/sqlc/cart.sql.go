@@ -14,8 +14,12 @@ DELETE FROM carts
 WHERE user_id = $1
 `
 
-func (q *Queries) ClearUserCart(ctx context.Context, userID int64) error {
-	_, err := q.db.Exec(ctx, clearUserCart, userID)
+type ClearUserCartParams struct {
+	UserID int64
+}
+
+func (q *Queries) ClearUserCart(ctx context.Context, arg ClearUserCartParams) error {
+	_, err := q.db.Exec(ctx, clearUserCart, arg.UserID)
 	return err
 }
 
@@ -57,8 +61,12 @@ WHERE user_id = $1
 ORDER BY updated_at DESC
 `
 
-func (q *Queries) GetUserCart(ctx context.Context, userID int64) ([]Cart, error) {
-	rows, err := q.db.Query(ctx, getUserCart, userID)
+type GetUserCartParams struct {
+	UserID int64
+}
+
+func (q *Queries) GetUserCart(ctx context.Context, arg GetUserCartParams) ([]Cart, error) {
+	rows, err := q.db.Query(ctx, getUserCart, arg.UserID)
 	if err != nil {
 		return nil, err
 	}
