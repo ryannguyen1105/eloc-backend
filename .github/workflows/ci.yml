@@ -17,13 +17,19 @@ jobs:
     name: Test Auth Service
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: eloc_auth
+
     services:
       postgres:
-        image: eloc_postgres
+        image: postgres:18
         env:
           POSTGRES_USER: root
           POSTGRES_PASSWORD: secret123
           POSTGRES_DB: eloc_auth
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -38,7 +44,16 @@ jobs:
       id: go
 
     - name: Check out code into Go module directory
-      uses: actions/setup-go@v4
+      uses: actions/checkout@v4
+
+    - name: Install golang-migrate
+      run: |
+        curl -L https://github.com/golang-migrate/migrate/releases/download/$version/migrate.$os-$arch.tar.gz | tar xvz
+        sudo mv migrate.linux-amd64 /usr/bin/migrate
+        which migrate
+
+    - name: Run migrations
+      run: make migrateup
 
     - name: Test
       run: make test
@@ -49,13 +64,19 @@ jobs:
     name: Test Product Service
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: eloc_product
+
     services:
       postgres:
-        image: eloc_postgres
+        image: postgres:18
         env:
           POSTGRES_USER: root
           POSTGRES_PASSWORD: secret123
           POSTGRES_DB: eloc_product
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -70,7 +91,16 @@ jobs:
       id: go
 
     - name: Check out code into Go module directory
-      uses: actions/setup-go@v4
+      uses: actions/checkout@v4
+
+    - name: Install golang-migrate
+      run: |
+        curl -L https://github.com/golang-migrate/migrate/releases/download/$version/migrate.$os-$arch.tar.gz | tar xvz
+        sudo mv migrate.linux-amd64 /usr/bin/migrate
+        which migrate
+
+    - name: Run migrations
+      run: make migrateup
 
     - name: Test
       run: make test
@@ -82,13 +112,19 @@ jobs:
     name: Test Order Service
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: eloc_order
+
     services:
       postgres:
-        image: eloc_postgres
+        image: postgres:18
         env:
           POSTGRES_USER: root
           POSTGRES_PASSWORD: secret123
           POSTGRES_DB: eloc_order
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -103,7 +139,13 @@ jobs:
       id: go
 
     - name: Check out code into Go module directory
-      uses: actions/setup-go@v4
+      uses: actions/checkout@v4
+
+    - name: Install golang-migrate
+      run: |
+        curl -L https://github.com/golang-migrate/migrate/releases/download/$version/migrate.$os-$arch.tar.gz | tar xvz
+        sudo mv migrate.linux-amd64 /usr/bin/migrate
+        which migrate
 
     - name: Run migrations
       run: make migrateup
