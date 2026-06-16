@@ -93,7 +93,7 @@ func TestListRoles(t *testing.T) {
 	}
 	arg := ListRolesParams{
 		Limit:  5,
-		Offset: 5,
+		Offset: 0,
 	}
 	roles, err := testQueries.ListRoles(context.Background(), arg)
 	require.NoError(t, err)
