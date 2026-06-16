@@ -18,8 +18,8 @@ func TestRegisterTx(t *testing.T) {
 	n := 5
 	refreshToken := util.RandomRefreshToken()
 
-	errs := make(chan error)
-	results := make(chan RegisterTxResult)
+	errs := make(chan error, n)
+	results := make(chan RegisterTxResult, n)
 
 	for i := 0; i < n; i++ {
 		go func() {
