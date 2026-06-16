@@ -17,6 +17,19 @@ jobs:
     name: Test Auth Service
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: eloc_postgres
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: secret123
+          POSTGRES_DB: eloc_auth
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
     - name: Set up Go 1.x
       uses: actions/setup-go@v4
@@ -35,6 +48,19 @@ jobs:
   test-product:
     name: Test Product Service
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: eloc_postgres
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: secret123
+          POSTGRES_DB: eloc_product
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
     - name: Set up Go 1.x
@@ -56,6 +82,19 @@ jobs:
     name: Test Order Service
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: eloc_postgres
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: secret123
+          POSTGRES_DB: eloc_order
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
     - name: Set up Go 1.x
       uses: actions/setup-go@v4
@@ -65,6 +104,9 @@ jobs:
 
     - name: Check out code into Go module directory
       uses: actions/setup-go@v4
+
+    - name: Run migrations
+      run: make migrateup
 
     - name: Test
       run: make test
