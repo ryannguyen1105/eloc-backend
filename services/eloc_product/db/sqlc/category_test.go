@@ -106,7 +106,7 @@ func TestListCategories(t *testing.T) {
 	}
 	arg := ListCategoriesParams {
 		Limit: 5,
-		Offset: 5,
+		Offset: 0,
 	}
 	categories, err := testQueries.ListCategories(context.Background(), arg)
 	require.NoError(t, err)
