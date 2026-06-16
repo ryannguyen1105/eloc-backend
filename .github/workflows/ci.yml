@@ -19,7 +19,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: eloc_auth
+        working-directory: services/eloc_auth
 
     services:
       postgres:
@@ -66,7 +66,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: eloc_product
+        working-directory: services/eloc_product
 
     services:
       postgres:
@@ -114,7 +114,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: eloc_order
+        working-directory: services/eloc_order
 
     services:
       postgres:
