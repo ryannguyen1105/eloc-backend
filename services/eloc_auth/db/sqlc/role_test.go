@@ -43,18 +43,19 @@ func TestGetRole(t *testing.T) {
 }
 
 func TestUpdateRole(t *testing.T) {
-	role1 := createRandomRole(t)
+	role := createRandomRole(t)
 
 	updateArg := UpdateRoleParams{
-		ID:   role1.ID,
+		ID:   role.ID,
 		Name: util.RandomName(),
 	}
-	err := testQueries.UpdateRole(context.Background(), updateArg)
+	role,err := testQueries.UpdateRole(context.Background(), updateArg)
 
 	require.NoError(t, err)
+	require.NotEmpty(t, role)
 
 	arg := GetRoleParams{
-		ID: role1.ID,
+		ID: role.ID,
 	}
 
 	updateRole, err := testQueries.GetRole(context.Background(), arg)

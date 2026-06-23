@@ -16,7 +16,7 @@ ORDER BY name
 LIMIT $1
 OFFSET $2;
 
--- name: UpdateRole :exec
+-- name: UpdateRole :one
 UPDATE roles
 set name = $2
 WHERE id = $1

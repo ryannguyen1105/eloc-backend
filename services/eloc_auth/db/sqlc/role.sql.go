@@ -94,7 +94,7 @@ func (q *Queries) ListRoles(ctx context.Context, arg ListRolesParams) ([]Role, e
 	return items, nil
 }
 
-const updateRole = `-- name: UpdateRole :exec
+const updateRole = `-- name: UpdateRole :one
 UPDATE roles
 set name = $2
 WHERE id = $1
@@ -106,7 +106,9 @@ type UpdateRoleParams struct {
 	Name string
 }
 
-func (q *Queries) UpdateRole(ctx context.Context, arg UpdateRoleParams) error {
-	_, err := q.db.ExecContext(ctx, updateRole, arg.ID, arg.Name)
-	return err
+func (q *Queries) UpdateRole(ctx context.Context, arg UpdateRoleParams) (Role, error) {
+	row := q.db.QueryRowContext(ctx, updateRole, arg.ID, arg.Name)
+	var i Role
+	err := row.Scan(&i.ID, &i.Name)
+	return i, err
 }

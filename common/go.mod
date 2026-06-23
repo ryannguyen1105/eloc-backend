@@ -1,4 +1,4 @@
-module github.com/ryannguyen1105/eloc-backend/util
+module github.com/ryannguyen1105/eloc-backend/common
 
 go 1.26.3
 
