@@ -6,7 +6,7 @@ import (
 
 	_ "github.com/lib/pq"
 	db "github.com/ryannguyen1105/eloc-backend/services/eloc_auth/db/sqlc"
-	"github.com/ryannguyen1105/eloc-backend/services/eloc_auth/internal/handler"
+	"github.com/ryannguyen1105/eloc-backend/services/eloc_auth/internal/api"
 )
 
 const (
@@ -22,7 +22,7 @@ func main() {
 	}
 
 	store := db.NewStore(conn)
-	server := handler.NewServer(store)
+	server := api.NewServer(store)
 
 	err = server.Start(serverAddress)
 	if err != nil {

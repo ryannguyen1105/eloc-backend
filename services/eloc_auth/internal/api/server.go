@@ -1,4 +1,4 @@
-package handler
+package api
 
 import (
 	"github.com/gin-gonic/gin"
@@ -17,16 +17,22 @@ func NewServer(store *db.Store) *Server {
 
 	server := &Server{
 		roleService: roleService,
-		router: router,
+		router:      router,
 	}
-
-	router.POST("/roles", server.CreateRole)
-	router.GET("/roles/:id", server.GetRole)
-	router.GET("/roles", server.ListRoles)
-	router.PUT("/roles/:id", server.UpdateRole)
-	router.DELETE("/roles/:id", server.DeleteRole)
+	server.setupRouter()
 
 	return server
+}
+
+func (server *Server) setupRouter() {
+	roleRouters := server.router.Group("/roles")
+	{
+		roleRouters.POST("", server.CreateRole)
+		roleRouters.GET("/:id", server.GetRole)
+		roleRouters.GET("", server.ListRoles)
+		roleRouters.PUT("/:id", server.UpdateRole)
+		roleRouters.DELETE("/:id", server.DeleteRole)
+	}
 }
 
 func (server *Server) Start(address string) error {
