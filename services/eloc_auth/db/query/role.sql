@@ -1,9 +1,12 @@
 -- name: CreateRole :one
 INSERT INTO roles (
-  name
+  id,
+  description
 ) VALUES (
-  $1
+  $1, $2
 )
+ON CONFLICT (id)
+DO UPDATE SET id = EXCLUDED.id
 RETURNING *;
 
 -- name: GetRole :one
@@ -12,13 +15,13 @@ WHERE id = $1 LIMIT 1;
 
 -- name: ListRoles :many
 SELECT * FROM roles
-ORDER BY name
+ORDER BY id
 LIMIT $1
 OFFSET $2;
 
 -- name: UpdateRole :one
 UPDATE roles
-set name = $2
+set description = $2
 WHERE id = $1
 RETURNING *;
 

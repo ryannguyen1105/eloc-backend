@@ -6,11 +6,6 @@ INSERT INTO users (
 )
 RETURNING *;
 
--- name: GetUserByID :one
-SELECT id, email, password_hash, fullname, role_id, is_active, is_verified, created_at, updated_at
-FROM users
-WHERE id = $1 LIMIT 1;
-
 -- name: GetUserByEmail :one
 SELECT id, email, password_hash, fullname, role_id, is_active, is_verified, created_at, updated_at
 FROM users
@@ -42,4 +37,4 @@ WHERE id = $1;
 
 -- name: DeleteUser :exec
 DELETE FROM users
-WHERE id = $1;
+WHERE email = $1;

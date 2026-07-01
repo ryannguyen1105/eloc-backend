@@ -5,6 +5,7 @@ go 1.26.3
 require (
 	github.com/gin-gonic/gin v1.12.0
 	github.com/lib/pq v1.12.3
+	github.com/ryannguyen1105/eloc-backend/common v0.0.0-20260624093014-77892d4faf5f
 	github.com/ryannguyen1105/eloc-backend/util v0.0.0-20260616133907-18d9bf1cd7e3
 	github.com/stretchr/testify v1.11.1
 )

@@ -11,21 +11,25 @@ import (
 
 const createRole = `-- name: CreateRole :one
 INSERT INTO roles (
-  name
+  id,
+  description
 ) VALUES (
-  $1
+  $1, $2
 )
-RETURNING id, name
+ON CONFLICT (id)
+DO UPDATE SET id = EXCLUDED.id
+RETURNING id, description
 `
 
 type CreateRoleParams struct {
-	Name string
+	ID          string
+	Description string
 }
 
 func (q *Queries) CreateRole(ctx context.Context, arg CreateRoleParams) (Role, error) {
-	row := q.db.QueryRowContext(ctx, createRole, arg.Name)
+	row := q.db.QueryRowContext(ctx, createRole, arg.ID, arg.Description)
 	var i Role
-	err := row.Scan(&i.ID, &i.Name)
+	err := row.Scan(&i.ID, &i.Description)
 	return i, err
 }
 
@@ -35,7 +39,7 @@ WHERE id = $1
 `
 
 type DeleteRoleParams struct {
-	ID int64
+	ID string
 }
 
 func (q *Queries) DeleteRole(ctx context.Context, arg DeleteRoleParams) error {
@@ -44,24 +48,24 @@ func (q *Queries) DeleteRole(ctx context.Context, arg DeleteRoleParams) error {
 }
 
 const getRole = `-- name: GetRole :one
-SELECT id, name FROM roles
+SELECT id, description FROM roles
 WHERE id = $1 LIMIT 1
 `
 
 type GetRoleParams struct {
-	ID int64
+	ID string
 }
 
 func (q *Queries) GetRole(ctx context.Context, arg GetRoleParams) (Role, error) {
 	row := q.db.QueryRowContext(ctx, getRole, arg.ID)
 	var i Role
-	err := row.Scan(&i.ID, &i.Name)
+	err := row.Scan(&i.ID, &i.Description)
 	return i, err
 }
 
 const listRoles = `-- name: ListRoles :many
-SELECT id, name FROM roles
-ORDER BY name
+SELECT id, description FROM roles
+ORDER BY id
 LIMIT $1
 OFFSET $2
 `
@@ -80,7 +84,7 @@ func (q *Queries) ListRoles(ctx context.Context, arg ListRolesParams) ([]Role, e
 	var items []Role
 	for rows.Next() {
 		var i Role
-		if err := rows.Scan(&i.ID, &i.Name); err != nil {
+		if err := rows.Scan(&i.ID, &i.Description); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -96,19 +100,19 @@ func (q *Queries) ListRoles(ctx context.Context, arg ListRolesParams) ([]Role, e
 
 const updateRole = `-- name: UpdateRole :one
 UPDATE roles
-set name = $2
+set description = $2
 WHERE id = $1
-RETURNING id, name
+RETURNING id, description
 `
 
 type UpdateRoleParams struct {
-	ID   int64
-	Name string
+	ID          string
+	Description string
 }
 
 func (q *Queries) UpdateRole(ctx context.Context, arg UpdateRoleParams) (Role, error) {
-	row := q.db.QueryRowContext(ctx, updateRole, arg.ID, arg.Name)
+	row := q.db.QueryRowContext(ctx, updateRole, arg.ID, arg.Description)
 	var i Role
-	err := row.Scan(&i.ID, &i.Name)
+	err := row.Scan(&i.ID, &i.Description)
 	return i, err
 }

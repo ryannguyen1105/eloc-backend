@@ -5,20 +5,22 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/ryannguyen1105/eloc-backend/util"
+	"github.com/ryannguyen1105/eloc-backend/common/util"
 	"github.com/stretchr/testify/require"
 )
 
 func createRandomRole(t *testing.T) Role {
 	arg := CreateRoleParams{
-		Name: util.RandomName(),
+		ID:util.RandomRoles() + " " + util.RandomPhone(),
+		Description: util.RandomDescription(),
 	}
 	role, err := testQueries.CreateRole(context.Background(), arg)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, role)
 
-	require.Equal(t, arg.Name, role.Name)
+	require.Equal(t, arg.ID, role.ID)
+	require.Equal(t, arg.Description, role.Description)
 
 	require.NotZero(t, role.ID)
 	return role
@@ -39,7 +41,7 @@ func TestGetRole(t *testing.T) {
 	require.NotEmpty(t, role2)
 
 	require.Equal(t, role1.ID, role2.ID)
-	require.Equal(t, role1.Name, role2.Name)
+	require.Equal(t, role1.Description, role2.Description)
 }
 
 func TestUpdateRole(t *testing.T) {
@@ -47,7 +49,7 @@ func TestUpdateRole(t *testing.T) {
 
 	updateArg := UpdateRoleParams{
 		ID:   role.ID,
-		Name: util.RandomName(),
+		Description: util.RandomDescription(),
 	}
 	role,err := testQueries.UpdateRole(context.Background(), updateArg)
 
@@ -63,7 +65,7 @@ func TestUpdateRole(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, updateRole)
 	require.Equal(t, updateArg.ID, updateRole.ID)
-	require.Equal(t, updateArg.Name, updateRole.Name)
+	require.Equal(t, updateArg.Description, updateRole.Description)
 }
 
 func TestDeleteRole(t *testing.T) {

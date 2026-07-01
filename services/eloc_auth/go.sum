@@ -61,6 +61,8 @@ github.com/quic-go/quic-go v0.60.0 h1:xcQioE8OM66UQLeUMHltK1CCcOu3JbVB4JAQdDQSB+
 github.com/quic-go/quic-go v0.60.0/go.mod h1:wpKpjmPpftl30sL6pFh7REVpjbcCVy4zt2vDyK1TuJk=
 github.com/rogpeppe/go-internal v1.10.0 h1:TMyTOH3F/DB16zRVcYyreMH6GnZZrwQVAoYjRBZyWFQ=
 github.com/rogpeppe/go-internal v1.10.0/go.mod h1:UQnix2H7Ngw/k4C5ijL5+65zddjncjaFoBhdsK/akog=
+github.com/ryannguyen1105/eloc-backend/common v0.0.0-20260624093014-77892d4faf5f h1:wWtwANR6DUfHPcDVkxgGbfg86UWvqDLDY4E3iRV3iJQ=
+github.com/ryannguyen1105/eloc-backend/common v0.0.0-20260624093014-77892d4faf5f/go.mod h1:v5s0wunGF4Pg0dWX4xa7kz82M3D5NukAN/MU6eRp9fs=
 github.com/ryannguyen1105/eloc-backend/util v0.0.0-20260616133907-18d9bf1cd7e3 h1:G2KhRdQiO0cT8495JnfK8LnC/oQQUdRwrY/Rby0rM2k=
 github.com/ryannguyen1105/eloc-backend/util v0.0.0-20260616133907-18d9bf1cd7e3/go.mod h1:BX9fwZS+hcY/tNpv/s9dYVm7BC0xJF0hLiUiiWPGvBw=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

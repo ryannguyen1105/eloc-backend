@@ -117,3 +117,15 @@ func RandomAddress() string {
 func RandomPhone() string {
 	return "0" + RandomNumberString(9)
 }
+
+func RandomRoles() string {
+	roles := []string{"ADMIN", "STAFF", "CUSTOMER"}
+	n := len(roles)
+	return roles[rand.Intn(n)]
+}
+
+func RandomDescription() string {
+	descriptions := []string{"System Administrator with full access rights", "Store Staff with limited operational access", "Default Customer account for general users"}
+	n := len(descriptions)
+	return descriptions[rand.Intn(n)]
+}

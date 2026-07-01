@@ -16,9 +16,9 @@ func createRandomUser(t *testing.T, role Role) User {
 	arg := CreateUserParams{
 		Email:        util.RandomEmail(),
 		PasswordHash: hashPassword,
-		Fullname:     role.Name,
+		Fullname:     role.Description,
 		RoleID:       role.ID,
-		IsActive:     false,
+		IsActive:     true,
 		IsVerified:   false,
 	}
 	user, err := testQueries.CreateUser(context.Background(), arg)
@@ -37,22 +37,6 @@ func createRandomUser(t *testing.T, role Role) User {
 func TestCreateUser(t *testing.T) {
 	role := createRandomRole(t)
 	createRandomUser(t, role)
-}
-
-func TestGetUserByID(t *testing.T) {
-	role := createRandomRole(t)
-	user1 := createRandomUser(t, role)
-	arg := GetUserByIDParams{
-		ID: user1.ID,
-	}
-	user2, err := testQueries.GetUserByID(context.Background(), arg)
-
-	require.NoError(t, err)
-	require.NotEmpty(t, user2)
-
-	require.Equal(t, user1.ID, user2.ID)
-	require.Equal(t, user1.Email, user2.Email)
-	require.Equal(t, user1.Fullname, user2.Fullname)
 }
 
 func TestGetUserByEmail(t *testing.T) {
@@ -107,10 +91,10 @@ func TestUpdateUserStatus(t *testing.T) {
 	err := testQueries.UpdateUserStatus(context.Background(), arg)
 	require.NoError(t, err)
 	
-	getArg := GetUserByIDParams {
-		ID: user1.ID,
+	getArg := GetUserByEmailParams {
+		Email: user1.Email,
 	}
-	user2, err := testQueries.GetUserByID(context.Background(), getArg)
+	user2, err := testQueries.GetUserByEmail(context.Background(), getArg)
 	require.NoError(t, err)
 	require.NotEmpty(t, user2)
 
@@ -129,15 +113,15 @@ func TestDeleteUser(t *testing.T) {
 	user1 := createRandomUser(t, role)
 
 	deleteArg := DeleteUserParams {
-		ID: user1.ID,
+		Email: user1.Email,
 	}
 	err := testQueries.DeleteUser(context.Background(), deleteArg)
 	require.NoError(t, err)
 
-	arg := GetUserByIDParams{
-		ID: user1.ID,
+	arg := GetUserByEmailParams{
+		Email: user1.Email,
 	}
-	user2, err := testQueries.GetUserByID(context.Background(), arg)
+	user2, err := testQueries.GetUserByEmail(context.Background(), arg)
 	require.Error(t, err)
 	require.ErrorIs(t, err, sql.ErrNoRows)
 

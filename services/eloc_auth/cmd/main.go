@@ -22,8 +22,14 @@ func main() {
 	}
 
 	store := db.NewStore(conn)
-	server := api.NewServer(store)
+	runGinServer(store)
+}
 
+func runGinServer (store db.Store) {
+	server, err := api.NewServer(store)
+	if err != nil {
+		log.Fatal("cannot create sever:", err)
+	}
 	err = server.Start(serverAddress)
 	if err != nil {
 		log.Fatalf("cannot start server: %v", err)

@@ -23,7 +23,7 @@ type CreateUserParams struct {
 	Email        string
 	PasswordHash string
 	Fullname     string
-	RoleID       int64
+	RoleID       string
 	IsActive     bool
 	IsVerified   bool
 }
@@ -54,15 +54,15 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 
 const deleteUser = `-- name: DeleteUser :exec
 DELETE FROM users
-WHERE id = $1
+WHERE email = $1
 `
 
 type DeleteUserParams struct {
-	ID int64
+	Email string
 }
 
 func (q *Queries) DeleteUser(ctx context.Context, arg DeleteUserParams) error {
-	_, err := q.db.ExecContext(ctx, deleteUser, arg.ID)
+	_, err := q.db.ExecContext(ctx, deleteUser, arg.Email)
 	return err
 }
 
@@ -78,33 +78,6 @@ type GetUserByEmailParams struct {
 
 func (q *Queries) GetUserByEmail(ctx context.Context, arg GetUserByEmailParams) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUserByEmail, arg.Email)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Email,
-		&i.PasswordHash,
-		&i.Fullname,
-		&i.RoleID,
-		&i.IsActive,
-		&i.IsVerified,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const getUserByID = `-- name: GetUserByID :one
-SELECT id, email, password_hash, fullname, role_id, is_active, is_verified, created_at, updated_at
-FROM users
-WHERE id = $1 LIMIT 1
-`
-
-type GetUserByIDParams struct {
-	ID int64
-}
-
-func (q *Queries) GetUserByID(ctx context.Context, arg GetUserByIDParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserByID, arg.ID)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -137,7 +110,7 @@ type ListUsersRow struct {
 	ID         int64
 	Email      string
 	Fullname   string
-	RoleID     int64
+	RoleID     string
 	IsActive   bool
 	IsVerified bool
 	CreatedAt  time.Time
@@ -189,14 +162,14 @@ RETURNING id, email, fullname, role_id, is_active, is_verified, created_at, upda
 type UpdateUserDetailParams struct {
 	ID       int64
 	Fullname string
-	RoleID   int64
+	RoleID   string
 }
 
 type UpdateUserDetailRow struct {
 	ID         int64
 	Email      string
 	Fullname   string
-	RoleID     int64
+	RoleID     string
 	IsActive   bool
 	IsVerified bool
 	CreatedAt  time.Time

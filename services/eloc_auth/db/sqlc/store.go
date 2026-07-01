@@ -8,13 +8,13 @@ import (
 )
 
 type Store struct {
-	*Queries
 	db *sql.DB
+	*Queries
 }
 
-func NewStore(db *sql.DB) *Store {
-	return &Store{
-		db:      db,
+func NewStore(db *sql.DB) Store {
+	return Store{
+		db: db,
 		Queries: New(db),
 	}
 }
@@ -39,7 +39,7 @@ type RegisterTxParams struct {
 	Email        string    `json:"email"`
 	PasswordHash string    `json:"password_hash"`
 	FullName     string    `json:"full_name"`
-	RoleID       int64     `json:"role_id"`
+	RoleID       string     `json:"role_id"`
 	RefreshToken string    `json:"refresh_token"`
 	ExpiresAt    time.Time `json:"expires_at"`
 }

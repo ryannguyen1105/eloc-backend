@@ -7,31 +7,33 @@ import (
 )
 
 type Server struct {
-	roleService *service.RoleService
+	store       db.Store
+	userService *service.UserService
 	router      *gin.Engine
 }
 
-func NewServer(store *db.Store) *Server {
-	roleService := service.NewRoleService(store)
+func NewServer(store db.Store) (*Server, error) {
+
+	userService := service.NewUserService(store)
 	router := gin.Default()
 
 	server := &Server{
-		roleService: roleService,
+		store:       store,
+		userService: userService,
 		router:      router,
 	}
 	server.setupRouter()
 
-	return server
+	return server, nil
 }
 
 func (server *Server) setupRouter() {
-	roleRouters := server.router.Group("/roles")
+
+	userRouters := server.router.Group("/users")
 	{
-		roleRouters.POST("", server.CreateRole)
-		roleRouters.GET("/:id", server.GetRole)
-		roleRouters.GET("", server.ListRoles)
-		roleRouters.PUT("/:id", server.UpdateRole)
-		roleRouters.DELETE("/:id", server.DeleteRole)
+		userRouters.POST("", server.CreateUser)
+		userRouters.POST("/login", server.loginUser)
+		userRouters.DELETE("/delete", server.deleteUser)
 	}
 }
 

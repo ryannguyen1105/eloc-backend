@@ -9,8 +9,8 @@ import (
 )
 
 type Role struct {
-	ID   int64
-	Name string
+	ID          string
+	Description string
 }
 
 type User struct {
@@ -18,7 +18,7 @@ type User struct {
 	Email        string
 	PasswordHash string
 	Fullname     string
-	RoleID       int64
+	RoleID       string
 	IsActive     bool
 	IsVerified   bool
 	CreatedAt    time.Time
