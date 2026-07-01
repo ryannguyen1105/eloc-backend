@@ -10,6 +10,11 @@ import (
 const alphabet = "abcdefghijklmnopqrstuvwxyz"
 const number = "0123456789"
 
+var (
+	roles = []string{"ADMIN", "STAFF", "CUSTOMER"}
+	descriptions = []string{"System Administrator with full access rights", "Store Staff with limited operational access", "Default Customer account for general users"}
+)
+
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
@@ -119,13 +124,9 @@ func RandomPhone() string {
 }
 
 func RandomRoles() string {
-	roles := []string{"ADMIN", "STAFF", "CUSTOMER"}
-	n := len(roles)
-	return roles[rand.Intn(n)]
+	return roles[rand.Intn(len(roles))]
 }
 
 func RandomDescription() string {
-	descriptions := []string{"System Administrator with full access rights", "Store Staff with limited operational access", "Default Customer account for general users"}
-	n := len(descriptions)
-	return descriptions[rand.Intn(n)]
+	return descriptions[rand.Intn(len(descriptions))]
 }
