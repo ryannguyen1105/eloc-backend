@@ -79,19 +79,18 @@ func TestUpdateUserDetail(t *testing.T) {
 
 }
 
-
 func TestUpdateUserStatus(t *testing.T) {
 	role := createRandomRole(t)
 	user1 := createRandomUser(t, role)
-	arg := UpdateUserStatusParams {
-		ID: user1.ID,
-		IsActive: true,
+	arg := UpdateUserStatusParams{
+		ID:         user1.ID,
+		IsActive:   true,
 		IsVerified: true,
 	}
 	err := testQueries.UpdateUserStatus(context.Background(), arg)
 	require.NoError(t, err)
-	
-	getArg := GetUserByEmailParams {
+
+	getArg := GetUserByEmailParams{
 		Email: user1.Email,
 	}
 	user2, err := testQueries.GetUserByEmail(context.Background(), getArg)
@@ -112,7 +111,7 @@ func TestDeleteUser(t *testing.T) {
 	role := createRandomRole(t)
 	user1 := createRandomUser(t, role)
 
-	deleteArg := DeleteUserParams {
+	deleteArg := DeleteUserParams{
 		Email: user1.Email,
 	}
 	err := testQueries.DeleteUser(context.Background(), deleteArg)
@@ -133,8 +132,8 @@ func TestListUsers(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		createRandomUser(t, role)
 	}
-	arg := ListUsersParams {
-		Limit: 5,
+	arg := ListUsersParams{
+		Limit:  5,
 		Offset: 5,
 	}
 	users, err := testQueries.ListUsers(context.Background(), arg)
