@@ -56,7 +56,7 @@ jobs:
       run: make migrateup
 
     - name: Test
-      run: make test
+      run: GOWORK=../../go.work make test
 
   # Eloc_Product_Service
 
@@ -103,7 +103,7 @@ jobs:
       run: make migrateup
 
     - name: Test
-      run: make test
+      run: GOWORK=../../go.work make test
 
 
   # Eloc_Order_Service
@@ -151,4 +151,4 @@ jobs:
       run: make migrateup
 
     - name: Test
-      run: make test
+      run: GOWORK=../../go.work make test
