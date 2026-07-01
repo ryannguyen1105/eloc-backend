@@ -11,7 +11,7 @@ import (
 
 func createRandomRole(t *testing.T) Role {
 	arg := CreateRoleParams{
-		ID:util.RandomRoles() + " " + util.RandomPhone(),
+		ID:          util.RandomRoles() + " " + util.RandomPhone(),
 		Description: util.RandomDescription(),
 	}
 	role, err := testQueries.CreateRole(context.Background(), arg)
@@ -48,10 +48,10 @@ func TestUpdateRole(t *testing.T) {
 	role := createRandomRole(t)
 
 	updateArg := UpdateRoleParams{
-		ID:   role.ID,
+		ID:          role.ID,
 		Description: util.RandomDescription(),
 	}
-	role,err := testQueries.UpdateRole(context.Background(), updateArg)
+	role, err := testQueries.UpdateRole(context.Background(), updateArg)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, role)
