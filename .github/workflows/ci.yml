@@ -41,6 +41,7 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: ^1.16
+        cache: false
       id: go
 
     - name: Check out code into Go module directory
@@ -88,6 +89,7 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: ^1.16
+        cache: false
       id: go
 
     - name: Check out code into Go module directory
@@ -136,6 +138,7 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: ^1.16
+        cache: false
       id: go
 
     - name: Check out code into Go module directory
