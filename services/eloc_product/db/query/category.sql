@@ -14,6 +14,10 @@ WHERE id = $1 LIMIT 1;
 SELECT * FROM categories
 WHERE slug = $1 LIMIT 1;
 
+-- name: GetCategoryByName :one
+SELECT * FROM categories
+WHERE name = $1 LIMIT 1;
+
 -- name: ListCategories :many
 SELECT * FROM categories
 ORDER BY name
@@ -28,4 +32,4 @@ WHERE id = $1;
 
 -- name: DeleteCategory :exec
 DELETE FROM categories
-WHERE id = $1;
+WHERE name = $1;

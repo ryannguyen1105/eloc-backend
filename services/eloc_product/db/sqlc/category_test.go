@@ -60,6 +60,21 @@ func TestGetCategoryBySlug(t *testing.T) {
 
 }
 
+func TestGetCategoryByName(t *testing.T) {
+	category1 := createRandomCategory(t)
+	arg := GetCategoryByNameParams {
+		Name: category1.Name,
+	}
+	category2, err := testQueries.GetCategoryByName(context.Background(), arg)
+	require.NoError(t, err)
+	require.NotEmpty(t, category2)
+
+	require.Equal(t, category1.ID, category2.ID)
+	require.Equal(t, category1.Name, category2.Name)
+	require.Equal(t, category1.Slug, category2.Slug)
+
+}
+
 func TestUpdateCategory(t *testing.T) {
 	category1 := createRandomCategory(t)
 	updateArg := UpdateCategoryParams {
@@ -85,7 +100,7 @@ func TestUpdateCategory(t *testing.T) {
 func TestDeleteCategory(t *testing.T) {
 	category1 := createRandomCategory(t)
 	deleteArg := DeleteCategoryParams {
-		ID: category1.ID,
+		Name: category1.Name,
 	}
 	err := testQueries.DeleteCategory(context.Background(), deleteArg)
 	require.NoError(t, err)

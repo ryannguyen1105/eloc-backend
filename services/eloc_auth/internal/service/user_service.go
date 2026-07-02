@@ -7,6 +7,9 @@ import (
 	db "github.com/ryannguyen1105/eloc-backend/services/eloc_auth/db/sqlc"
 )
 
+type UserService struct {
+	store db.Store
+}
 type CreateUserDTO struct {
 	Email    string
 	Password string
@@ -23,13 +26,10 @@ type DeleteUserDTO struct {
 	Email string
 }
 
-type UserService struct {
-	store db.Store
-}
-
 func NewUserService(store db.Store) *UserService {
 	return &UserService{store: store}
 }
+
 
 func (userService *UserService) CreateUser(ctx context.Context, dto CreateUserDTO) (db.User, error) {
 	role, err := userService.store.CreateRole(ctx, db.CreateRoleParams{

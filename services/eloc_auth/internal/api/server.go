@@ -13,7 +13,6 @@ type Server struct {
 }
 
 func NewServer(store db.Store) (*Server, error) {
-
 	userService := service.NewUserService(store)
 	router := gin.Default()
 

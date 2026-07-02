@@ -32,15 +32,15 @@ func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) 
 
 const deleteCategory = `-- name: DeleteCategory :exec
 DELETE FROM categories
-WHERE id = $1
+WHERE name = $1
 `
 
 type DeleteCategoryParams struct {
-	ID int64
+	Name string
 }
 
 func (q *Queries) DeleteCategory(ctx context.Context, arg DeleteCategoryParams) error {
-	_, err := q.db.ExecContext(ctx, deleteCategory, arg.ID)
+	_, err := q.db.ExecContext(ctx, deleteCategory, arg.Name)
 	return err
 }
 
@@ -55,6 +55,22 @@ type GetCategoryByIDParams struct {
 
 func (q *Queries) GetCategoryByID(ctx context.Context, arg GetCategoryByIDParams) (Category, error) {
 	row := q.db.QueryRowContext(ctx, getCategoryByID, arg.ID)
+	var i Category
+	err := row.Scan(&i.ID, &i.Name, &i.Slug)
+	return i, err
+}
+
+const getCategoryByName = `-- name: GetCategoryByName :one
+SELECT id, name, slug FROM categories
+WHERE name = $1 LIMIT 1
+`
+
+type GetCategoryByNameParams struct {
+	Name string
+}
+
+func (q *Queries) GetCategoryByName(ctx context.Context, arg GetCategoryByNameParams) (Category, error) {
+	row := q.db.QueryRowContext(ctx, getCategoryByName, arg.Name)
 	var i Category
 	err := row.Scan(&i.ID, &i.Name, &i.Slug)
 	return i, err
