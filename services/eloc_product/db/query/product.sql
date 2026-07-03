@@ -16,6 +16,11 @@ SELECT id, category_id, name, slug, sku, price, stock, attributes, created_at, u
 FROM products
 WHERE slug = $1 LIMIT 1;
 
+-- name: GetProductByName :one
+SELECT id, category_id, name, slug, sku, price, stock, attributes, created_at, updated_at
+FROM products
+WHERE name = $1 LIMIT 1;
+
 -- name: ListProducts :many
 SELECT id, category_id, name, slug, sku, price, stock, created_at
 FROM products
@@ -41,16 +46,16 @@ SET
     attributes = $8,
     updated_at = now()
 WHERE id = $1
-RETURNING id, category_id, name, slug, sku, price, stock, attributes, updated_at;
+RETURNING *;
 
 -- name: UpdateProductStock :one
 UPDATE products
 SET 
     stock = stock + $2,
     updated_at = now()
-WHERE id = $1
-RETURNING id, name, stock;
+WHERE name = $1
+RETURNING *;
 
 -- name: DeleteProduct :exec
 DELETE FROM products
-WHERE id = $1;
+WHERE name = $1;

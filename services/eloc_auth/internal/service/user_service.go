@@ -6,10 +6,6 @@ import (
 	"github.com/ryannguyen1105/eloc-backend/common/util"
 	db "github.com/ryannguyen1105/eloc-backend/services/eloc_auth/db/sqlc"
 )
-
-type UserService struct {
-	store db.Store
-}
 type CreateUserDTO struct {
 	Email    string
 	Password string
@@ -26,12 +22,7 @@ type DeleteUserDTO struct {
 	Email string
 }
 
-func NewUserService(store db.Store) *UserService {
-	return &UserService{store: store}
-}
-
-
-func (userService *UserService) CreateUser(ctx context.Context, dto CreateUserDTO) (db.User, error) {
+func (userService *AuthService) CreateUser(ctx context.Context, dto CreateUserDTO) (db.User, error) {
 	role, err := userService.store.CreateRole(ctx, db.CreateRoleParams{
 		ID:          dto.Role,
 		Description: "",
@@ -50,7 +41,7 @@ func (userService *UserService) CreateUser(ctx context.Context, dto CreateUserDT
 	return userService.store.CreateUser(ctx, arg)
 }
 
-func (userService *UserService) LoginUser(ctx context.Context, dto LoginUserDTO) (db.User, error) {
+func (userService *AuthService) LoginUser(ctx context.Context, dto LoginUserDTO) (db.User, error) {
 	user, err := userService.store.GetUserByEmail(ctx, db.GetUserByEmailParams{
 		Email: dto.Email,
 	})
@@ -64,7 +55,7 @@ func (userService *UserService) LoginUser(ctx context.Context, dto LoginUserDTO)
 	return user, nil
 }
 
-func (userService *UserService) DeleteUser(ctx context.Context, dto DeleteUserDTO) (db.User, error) {
+func (userService *AuthService) DeleteUser(ctx context.Context, dto DeleteUserDTO) (db.User, error) {
 	user, err := userService.store.GetUserByEmail(ctx, db.GetUserByEmailParams{
 		Email: dto.Email,
 	})

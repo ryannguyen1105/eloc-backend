@@ -6,25 +6,15 @@ import (
 	db "github.com/ryannguyen1105/eloc-backend/services/eloc_product/db/sqlc"
 )
 
-type ProductService struct {
-	store db.Store
-}
-
 type CreateCategoryDTO struct {
 	Name string
 	Slug string
 }
-
 type GetCategoryDTO struct {
 	Name string
 }
-
 type DeleteCategoryDTO struct {
 	Name string
-}
-
-func NewProductService(store db.Store) *ProductService {
-	return &ProductService{store: store}
 }
 
 func (productService *ProductService) CreateCategory(ctx context.Context, dto CreateCategoryDTO) (db.Category, error) {

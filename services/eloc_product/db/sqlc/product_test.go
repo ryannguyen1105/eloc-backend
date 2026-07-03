@@ -119,14 +119,14 @@ func TestUpdateProductStock(t *testing.T) {
 	category := createRandomCategory(t)
 	product1 := createRandomProduct(t, category)
 	arg := UpdateProductStockParams{
-		ID:    product1.ID,
+		Name:    product1.Name,
 		Stock: product1.Stock,
 	}
 	product2, err := testQueries.UpdateProductStock(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, product2)
 
-	require.Equal(t, arg.ID, product2.ID)
+	require.Equal(t, arg.Name, product2.Name)
 	require.Equal(t, arg.Stock, product2.Stock)
 }
 
@@ -134,7 +134,7 @@ func TestDeleteProduct(t *testing.T) {
 	category := createRandomCategory(t)
 	product1 := createRandomProduct(t, category)
 	deleteArg := DeleteProductParams{
-		ID: product1.ID,
+		Name: product1.Name,
 	}
 	err := testQueries.DeleteProduct(context.Background(), deleteArg)
 	require.NoError(t, err)

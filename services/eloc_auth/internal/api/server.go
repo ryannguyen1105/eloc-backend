@@ -8,17 +8,17 @@ import (
 
 type Server struct {
 	store       db.Store
-	userService *service.UserService
+	authService *service.AuthService
 	router      *gin.Engine
 }
 
 func NewServer(store db.Store) (*Server, error) {
-	userService := service.NewUserService(store)
+	authService := service.NewAuthService(store)
 	router := gin.Default()
 
 	server := &Server{
 		store:       store,
-		userService: userService,
+		authService: authService,
 		router:      router,
 	}
 	server.setupRouter()
@@ -30,7 +30,7 @@ func (server *Server) setupRouter() {
 
 	userRouters := server.router.Group("/users")
 	{
-		userRouters.POST("", server.CreateUser)
+		userRouters.POST("", server.createUser)
 		userRouters.POST("/login", server.loginUser)
 		userRouters.DELETE("/delete", server.deleteUser)
 	}

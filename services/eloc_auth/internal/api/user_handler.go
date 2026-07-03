@@ -38,7 +38,7 @@ func newUserResponse(user db.User) userResponse {
 	}
 }
 
-func (server *Server) CreateUser(ctx *gin.Context) {
+func (server *Server) createUser(ctx *gin.Context) {
 	var req createUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
@@ -56,7 +56,7 @@ func (server *Server) CreateUser(ctx *gin.Context) {
 		Role:     req.Role,
 	}
 
-	user, err := server.userService.CreateUser(ctx, dto)
+	user, err := server.authService.CreateUser(ctx, dto)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -122,6 +122,7 @@ func (server *Server) deleteUser(ctx *gin.Context) {
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
 	}
 	err = util.CheckPasswordHash(req.Password, user.PasswordHash)
 	if err != nil {

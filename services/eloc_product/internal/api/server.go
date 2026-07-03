@@ -28,9 +28,17 @@ func NewServer(store db.Store) (*Server, error) {
 func (server *Server) setupRouter() {
 	categoryRouters := server.router.Group("/category")
 	{
-		categoryRouters.POST("", server.CreateCategory)
-		categoryRouters.GET("",server.GetCategory)
-		categoryRouters.DELETE("/delete", server.DeleteCategory)
+		categoryRouters.POST("", server.createCategory)
+		categoryRouters.GET("",server.getCategory)
+		categoryRouters.DELETE("/delete", server.deleteCategory)
+	}
+	productRouters := server.router.Group("/product")
+	{
+		productRouters.POST("", server.createProduct)
+		productRouters.GET("", server.getProduct)
+		productRouters.PUT("/update", server.updateProduct)
+		productRouters.PATCH("/updatestock",server.updateProductStock )
+		productRouters.DELETE("/delete", server.deleteProduct)
 	}
 }
 

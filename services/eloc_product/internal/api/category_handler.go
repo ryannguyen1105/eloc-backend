@@ -26,7 +26,7 @@ func newCategoryResponse(category db.Category) categoryResponse {
 	}
 }
 
-func (server *Server) CreateCategory(ctx *gin.Context) {
+func (server *Server) createCategory(ctx *gin.Context) {
 	var req createCategoryRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
@@ -49,7 +49,7 @@ type getCategoryRequest struct {
 	Name string `json:"name" binding:"required"`
 }
 
-func (server *Server) GetCategory(ctx *gin.Context) {
+func (server *Server) getCategory(ctx *gin.Context) {
 	var req getCategoryRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
@@ -71,7 +71,7 @@ type deleteCategoryRequest struct {
 	Name string `json:"name" binding:"required"`
 }
 
-func (server *Server) DeleteCategory(ctx *gin.Context) {
+func (server *Server) deleteCategory(ctx *gin.Context) {
 	var req deleteCategoryRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
@@ -97,5 +97,5 @@ func (server *Server) DeleteCategory(ctx *gin.Context) {
 			return
 		}
 	}
-	ctx.JSON(http.StatusOK, category)
+	ctx.JSON(http.StatusOK,gin.H{"message": "deleted successful", "data": category})
 }
