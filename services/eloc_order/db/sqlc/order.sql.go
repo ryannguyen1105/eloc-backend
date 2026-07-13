@@ -134,7 +134,7 @@ SET
     status = $2,
     updated_at = now()
 WHERE id = $1
-RETURNING id, status, updated_at
+RETURNING id, user_id, total_amount, status, shipping_address, customer_phone, created_at, updated_at
 `
 
 type UpdateOrderStatusParams struct {
@@ -142,15 +142,18 @@ type UpdateOrderStatusParams struct {
 	Status string
 }
 
-type UpdateOrderStatusRow struct {
-	ID        int64
-	Status    string
-	UpdatedAt time.Time
-}
-
-func (q *Queries) UpdateOrderStatus(ctx context.Context, arg UpdateOrderStatusParams) (UpdateOrderStatusRow, error) {
+func (q *Queries) UpdateOrderStatus(ctx context.Context, arg UpdateOrderStatusParams) (Order, error) {
 	row := q.db.QueryRowContext(ctx, updateOrderStatus, arg.ID, arg.Status)
-	var i UpdateOrderStatusRow
-	err := row.Scan(&i.ID, &i.Status, &i.UpdatedAt)
+	var i Order
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.TotalAmount,
+		&i.Status,
+		&i.ShippingAddress,
+		&i.CustomerPhone,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
 	return i, err
 }

@@ -27,14 +27,23 @@ func NewServer(store db.Store) (*Server, error) {
 }
 
 func (server *Server) setupRouter() {
-	orderRouters := server.router.Group("/cart")
+	cartRouters := server.router.Group("/cart")
 	{
-		orderRouters.POST("", server.createCart)
-		orderRouters.GET("", server.getCart)
-		orderRouters.PATCH("/update", server.updateCartQuantity)
-		orderRouters.DELETE("/remove", server.removeFromCart)
-		orderRouters.DELETE("/clear", server.clearFromCart)
+		cartRouters.POST("", server.createCart)
+		cartRouters.GET("", server.getCart)
+		cartRouters.PATCH("/update", server.updateCartQuantity)
+		cartRouters.DELETE("/remove", server.removeFromCart)
+		cartRouters.DELETE("/clear", server.clearFromCart)
 	}
+
+	orderRouters := server.router.Group("/order")
+	{
+		orderRouters.POST("", server.createOrder)
+		orderRouters.GET("", server.getOrder)
+		orderRouters.GET("/list", server.listOrder)
+		orderRouters.PATCH("/update", server.updateOrderStatus)
+	}
+
 }
 
 func (server *Server) Start(address string) error {
