@@ -5,32 +5,32 @@ import (
 	"log"
 
 	_ "github.com/lib/pq"
+	"github.com/ryannguyen1105/eloc-backend/services/eloc_auth/config"
 	db "github.com/ryannguyen1105/eloc-backend/services/eloc_auth/db/sqlc"
 	"github.com/ryannguyen1105/eloc-backend/services/eloc_auth/internal/api"
 )
 
-const (
-	dbDriver      = "postgres"
-	dbSource      = "postgresql://root:secret123@localhost:5432/eloc_auth?sslmode=disable"
-	serverAddress = "0.0.0.0:8081"
-)
-
 func main() {
-	conn, err := sql.Open(dbDriver, dbSource)
+	config, err := config.LoadConfig(".")
 	if err != nil {
-		log.Fatalf("cannot connect to database: %v", err)
+		log.Fatal("cannot load congif", err)
+	}
+
+	conn, err := sql.Open(config.DBDriver, config.DBSource)
+	if err != nil {
+		log.Fatal("cannot connect to db:", err)
 	}
 
 	store := db.NewStore(conn)
-	runGinServer(store)
+	runGinServer(config, store)
 }
 
-func runGinServer (store db.Store) {
+func runGinServer(config config.Config, store db.Store) {
 	server, err := api.NewServer(store)
 	if err != nil {
 		log.Fatal("cannot create sever:", err)
 	}
-	err = server.Start(serverAddress)
+	err = server.Start(config.ServerAddress)
 	if err != nil {
 		log.Fatalf("cannot start server: %v", err)
 	}
