@@ -2,10 +2,12 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lib/pq"
 	"github.com/ryannguyen1105/eloc-backend/common/util"
 	db "github.com/ryannguyen1105/eloc-backend/services/eloc_auth/db/sqlc"
 	"github.com/ryannguyen1105/eloc-backend/services/eloc_auth/internal/service"
@@ -58,6 +60,16 @@ func (server *Server) createUser(ctx *gin.Context) {
 
 	user, err := server.authService.CreateUser(ctx, dto)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code.Name() {
+			case "unique_violation":
+				ctx.JSON(http.StatusForbidden, errorResponse(errors.New("email already exists")))
+				return
+
+			case "foreign_key_violation":
+				ctx.JSON(http.StatusForbidden, errorResponse(errors.New("selected role does not exist")))
+			}
+		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
