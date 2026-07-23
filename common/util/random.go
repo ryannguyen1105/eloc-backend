@@ -61,7 +61,7 @@ func RandomName() string {
 }
 
 func RandomToken() string {
-	return RandomAlphabet(32)
+	return RandomNumberString(32)
 }
 
 func RandomRefreshToken() string {
