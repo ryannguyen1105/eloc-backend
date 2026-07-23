@@ -60,6 +60,10 @@ func RandomName() string {
 	return RandomAlphabet(4)
 }
 
+func RandomToken() string {
+	return RandomAlphabet(32)
+}
+
 func RandomRefreshToken() string {
 	return RandomAlphabet(3) + RandomNumberString(5) + RandomAlphabet(5) + RandomNumberString(5)
 }
