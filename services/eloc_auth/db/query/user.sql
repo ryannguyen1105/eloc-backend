@@ -21,11 +21,13 @@ OFFSET $2;
 -- name: UpdateUserDetail :one
 UPDATE users
 SET 
-    fullname = $2,
-    role_id = $3,
+    email = $2,
+    password_hash = $3,
+    fullname = $4,
+    role_id = $5,
     updated_at = now()
 WHERE id = $1
-RETURNING id, email, fullname, role_id, is_active, is_verified, created_at, updated_at;
+RETURNING *;
 
 -- name: UpdateUserStatus :exec
 UPDATE users

@@ -18,6 +18,12 @@ type LoginUserDTO struct {
 	Password string
 }
 
+type UpdateUserDetailDTO struct {
+	Email    string
+	Password string
+	FullName string
+}
+
 type DeleteUserDTO struct {
 	Email string
 }
@@ -53,6 +59,15 @@ func (userService *AuthService) LoginUser(ctx context.Context, dto LoginUserDTO)
 		return db.User{}, err
 	}	
 	return user, nil
+}
+
+func (userService *AuthService) UpdateUserDetail(ctx context.Context, dto UpdateUserDetailDTO) (db.User, error) {
+	arg := db.UpdateUserDetailParams{
+		Email: dto.Email,
+		PasswordHash: dto.Password,
+		Fullname: dto.FullName,
+	}
+	return userService.store.UpdateUserDetail(ctx, arg)
 }
 
 func (userService *AuthService) DeleteUser(ctx context.Context, dto DeleteUserDTO) (db.User, error) {

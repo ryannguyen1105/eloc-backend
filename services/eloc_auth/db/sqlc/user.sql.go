@@ -152,36 +152,36 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]ListUse
 const updateUserDetail = `-- name: UpdateUserDetail :one
 UPDATE users
 SET 
-    fullname = $2,
-    role_id = $3,
+    email = $2,
+    password_hash = $3,
+    fullname = $4,
+    role_id = $5,
     updated_at = now()
 WHERE id = $1
-RETURNING id, email, fullname, role_id, is_active, is_verified, created_at, updated_at
+RETURNING id, email, password_hash, fullname, role_id, is_active, is_verified, created_at, updated_at
 `
 
 type UpdateUserDetailParams struct {
-	ID       int64
-	Fullname string
-	RoleID   string
+	ID           int64
+	Email        string
+	PasswordHash string
+	Fullname     string
+	RoleID       string
 }
 
-type UpdateUserDetailRow struct {
-	ID         int64
-	Email      string
-	Fullname   string
-	RoleID     string
-	IsActive   bool
-	IsVerified bool
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
-}
-
-func (q *Queries) UpdateUserDetail(ctx context.Context, arg UpdateUserDetailParams) (UpdateUserDetailRow, error) {
-	row := q.db.QueryRowContext(ctx, updateUserDetail, arg.ID, arg.Fullname, arg.RoleID)
-	var i UpdateUserDetailRow
+func (q *Queries) UpdateUserDetail(ctx context.Context, arg UpdateUserDetailParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, updateUserDetail,
+		arg.ID,
+		arg.Email,
+		arg.PasswordHash,
+		arg.Fullname,
+		arg.RoleID,
+	)
+	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
+		&i.PasswordHash,
 		&i.Fullname,
 		&i.RoleID,
 		&i.IsActive,

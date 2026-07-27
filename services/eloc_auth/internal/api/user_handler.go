@@ -84,8 +84,8 @@ type loginUserRequest struct {
 }
 
 type loginUserResponse struct {
-	AccessToken string       `json:"access_token"`
-	User        userResponse `json:"user"`
+	Token string       `json:"token"`
+	User  userResponse `json:"user"`
 }
 
 func (server *Server) loginUser(ctx *gin.Context) {
@@ -110,17 +110,89 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
-	accessToken, err := server.tokenMaker.CreateToken(user.ID,
+	token, err := server.tokenMaker.CreateToken(user.ID,
 		user.Email, user.RoleID, server.config.AccessTokenDuration)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	_, err = server.store.CreateUserToken(ctx, db.CreateUserTokenParams{
+		UserID:       user.ID,
+		RefreshToken: token,
+		ExpiresAt:    time.Now().Add(server.config.AccessTokenDuration),
+	})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
 	rsp := loginUserResponse{
-		AccessToken: accessToken,
-		User:        newUserResponse(user),
+		Token: token,
+		User:  newUserResponse(user),
 	}
+	ctx.JSON(http.StatusOK, rsp)
+}
+
+type updateUserDetailRequest struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=6"`
+	FullName string `json:"full_name" binding:"required"`
+}
+
+type updatedUserResponse struct {
+	Email      string    `json:"email"`
+	FullName   string    `json:"full_name"`
+	IsActive   bool      `json:"is_active"`
+	IsVerified bool      `json:"is_verified"`
+	UpdatedAt  time.Time `json:"updated_at"`
+	Role       string    `json:"role"`
+}
+
+func newUpdatedUserResponse(user db.User) updatedUserResponse {
+	return updatedUserResponse{
+		Email:      user.Email,
+		FullName:   user.Fullname,
+		IsActive:   user.IsActive,
+		IsVerified: user.IsVerified,
+		UpdatedAt:  user.UpdatedAt,
+		Role:       user.RoleID,
+	}
+}
+
+func (server *Server) UpdateUserDetail(ctx *gin.Context) {
+	var req updateUserDetailRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+	user, err := server.store.GetUserByEmail(ctx, db.GetUserByEmailParams{
+		Email: req.Email,
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found with this email"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	hashedPassword, err := util.HashPassword(req.Password)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	updatedUser, err := server.store.UpdateUserDetail(ctx, db.UpdateUserDetailParams{
+		ID:           user.ID,
+		Email:        req.Email,
+		PasswordHash: hashedPassword,
+		Fullname:     req.FullName,
+		RoleID:       user.RoleID,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	rsp := newUpdatedUserResponse(updatedUser)
 	ctx.JSON(http.StatusOK, rsp)
 }
 

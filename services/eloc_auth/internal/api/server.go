@@ -23,7 +23,7 @@ func NewServer(config config.Config, store db.Store) (*Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
 	}
-	authService := service.NewAuthService(store)
+	authService := service.NewAuthService(store, tokenMaker, config)
 
 	server := &Server{
 		config:      config,
@@ -43,6 +43,7 @@ func (server *Server) setupRouter() {
 	{
 		userRouters.POST("", server.createUser)
 		userRouters.POST("/login", server.loginUser)
+		userRouters.PATCH("/update", server.UpdateUserDetail)
 		userRouters.DELETE("/delete", server.deleteUser)
 	}
 
