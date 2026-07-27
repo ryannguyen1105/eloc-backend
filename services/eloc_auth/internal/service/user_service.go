@@ -19,7 +19,6 @@ type LoginUserDTO struct {
 }
 
 type UpdateUserDetailDTO struct {
-	Email    string
 	Password string
 	FullName string
 }
@@ -63,7 +62,6 @@ func (userService *AuthService) LoginUser(ctx context.Context, dto LoginUserDTO)
 
 func (userService *AuthService) UpdateUserDetail(ctx context.Context, dto UpdateUserDetailDTO) (db.User, error) {
 	arg := db.UpdateUserDetailParams{
-		Email: dto.Email,
 		PasswordHash: dto.Password,
 		Fullname: dto.FullName,
 	}

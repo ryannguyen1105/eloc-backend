@@ -152,10 +152,9 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]ListUse
 const updateUserDetail = `-- name: UpdateUserDetail :one
 UPDATE users
 SET 
-    email = $2,
-    password_hash = $3,
-    fullname = $4,
-    role_id = $5,
+    password_hash = $2,
+    fullname = $3,
+    role_id = $4,
     updated_at = now()
 WHERE id = $1
 RETURNING id, email, password_hash, fullname, role_id, is_active, is_verified, created_at, updated_at
@@ -163,7 +162,6 @@ RETURNING id, email, password_hash, fullname, role_id, is_active, is_verified, c
 
 type UpdateUserDetailParams struct {
 	ID           int64
-	Email        string
 	PasswordHash string
 	Fullname     string
 	RoleID       string
@@ -172,7 +170,6 @@ type UpdateUserDetailParams struct {
 func (q *Queries) UpdateUserDetail(ctx context.Context, arg UpdateUserDetailParams) (User, error) {
 	row := q.db.QueryRowContext(ctx, updateUserDetail,
 		arg.ID,
-		arg.Email,
 		arg.PasswordHash,
 		arg.Fullname,
 		arg.RoleID,

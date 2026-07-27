@@ -183,7 +183,6 @@ func (server *Server) UpdateUserDetail(ctx *gin.Context) {
 	}
 	updatedUser, err := server.store.UpdateUserDetail(ctx, db.UpdateUserDetailParams{
 		ID:           user.ID,
-		Email:        req.Email,
 		PasswordHash: hashedPassword,
 		Fullname:     req.FullName,
 		RoleID:       user.RoleID,
