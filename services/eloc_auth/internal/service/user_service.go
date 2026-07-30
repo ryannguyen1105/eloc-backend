@@ -6,6 +6,7 @@ import (
 	"github.com/ryannguyen1105/eloc-backend/common/util"
 	db "github.com/ryannguyen1105/eloc-backend/services/eloc_auth/db/sqlc"
 )
+
 type CreateUserDTO struct {
 	Email    string
 	Password string
@@ -21,6 +22,11 @@ type LoginUserDTO struct {
 type UpdateUserDetailDTO struct {
 	Password string
 	FullName string
+}
+
+type UpdateUserStatusDTO struct {
+	IsActive   bool
+	IsVerified bool
 }
 
 type DeleteUserDTO struct {
@@ -56,14 +62,14 @@ func (userService *AuthService) LoginUser(ctx context.Context, dto LoginUserDTO)
 	err = util.CheckPasswordHash(dto.Password, user.PasswordHash)
 	if err != nil {
 		return db.User{}, err
-	}	
+	}
 	return user, nil
 }
 
 func (userService *AuthService) UpdateUserDetail(ctx context.Context, dto UpdateUserDetailDTO) (db.User, error) {
 	arg := db.UpdateUserDetailParams{
 		PasswordHash: dto.Password,
-		Fullname: dto.FullName,
+		Fullname:     dto.FullName,
 	}
 	return userService.store.UpdateUserDetail(ctx, arg)
 }
@@ -75,7 +81,7 @@ func (userService *AuthService) DeleteUser(ctx context.Context, dto DeleteUserDT
 	if err != nil {
 		return db.User{}, err
 	}
-	err = userService.store.DeleteUser(ctx,db.DeleteUserParams{
+	err = userService.store.DeleteUser(ctx, db.DeleteUserParams{
 		Email: user.Email,
 	})
 	if err != nil {

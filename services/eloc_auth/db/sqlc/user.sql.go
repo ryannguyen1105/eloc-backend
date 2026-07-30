@@ -189,13 +189,14 @@ func (q *Queries) UpdateUserDetail(ctx context.Context, arg UpdateUserDetailPara
 	return i, err
 }
 
-const updateUserStatus = `-- name: UpdateUserStatus :exec
+const updateUserStatus = `-- name: UpdateUserStatus :one
 UPDATE users
 SET 
     is_active = $2,
     is_verified = $3,
     updated_at = now()
 WHERE id = $1
+RETURNING id, email, password_hash, fullname, role_id, is_active, is_verified, created_at, updated_at
 `
 
 type UpdateUserStatusParams struct {
@@ -204,7 +205,19 @@ type UpdateUserStatusParams struct {
 	IsVerified bool
 }
 
-func (q *Queries) UpdateUserStatus(ctx context.Context, arg UpdateUserStatusParams) error {
-	_, err := q.db.ExecContext(ctx, updateUserStatus, arg.ID, arg.IsActive, arg.IsVerified)
-	return err
+func (q *Queries) UpdateUserStatus(ctx context.Context, arg UpdateUserStatusParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, updateUserStatus, arg.ID, arg.IsActive, arg.IsVerified)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.PasswordHash,
+		&i.Fullname,
+		&i.RoleID,
+		&i.IsActive,
+		&i.IsVerified,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

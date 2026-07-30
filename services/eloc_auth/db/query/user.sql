@@ -28,13 +28,15 @@ SET
 WHERE id = $1
 RETURNING *;
 
--- name: UpdateUserStatus :exec
+-- name: UpdateUserStatus :one
 UPDATE users
 SET 
     is_active = $2,
     is_verified = $3,
     updated_at = now()
-WHERE id = $1;
+WHERE id = $1
+RETURNING *;
+
 
 -- name: DeleteUser :exec
 DELETE FROM users
