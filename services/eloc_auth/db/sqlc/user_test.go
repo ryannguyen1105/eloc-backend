@@ -87,7 +87,7 @@ func TestUpdateUserStatus(t *testing.T) {
 		IsActive:   true,
 		IsVerified: true,
 	}
-	err := testQueries.UpdateUserStatus(context.Background(), arg)
+	_, err := testQueries.UpdateUserStatus(context.Background(), arg)
 	require.NoError(t, err)
 
 	getArg := GetUserByEmailParams{
