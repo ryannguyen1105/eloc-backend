@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
+	"github.com/ryannguyen1105/eloc-backend/common/middleware"
 	"github.com/ryannguyen1105/eloc-backend/common/util"
 	db "github.com/ryannguyen1105/eloc-backend/services/eloc_auth/db/sqlc"
 	"github.com/ryannguyen1105/eloc-backend/services/eloc_auth/internal/service"
@@ -111,7 +112,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		return
 	}
 	token, err := server.tokenMaker.CreateToken(user.ID,
-		user.Email, user.RoleID, server.config.AccessTokenDuration)
+		user.Email, user.RoleID, user.IsVerified, server.config.AccessTokenDuration)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -133,7 +134,6 @@ func (server *Server) loginUser(ctx *gin.Context) {
 }
 
 type updateUserDetailRequest struct {
-	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=6"`
 	FullName string `json:"full_name" binding:"required"`
 }
@@ -156,16 +156,21 @@ func newUpdatedUserResponse(user db.User) updatedUserResponse {
 		UpdatedAt:  user.UpdatedAt,
 		Role:       user.RoleID,
 	}
-}
+} 
 
 func (server *Server) UpdateUserDetail(ctx *gin.Context) {
+	payload, err := middleware.GetAuthPayload(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
 	var req updateUserDetailRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 	user, err := server.store.GetUserByEmail(ctx, db.GetUserByEmailParams{
-		Email: req.Email,
+		Email: payload.Email,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

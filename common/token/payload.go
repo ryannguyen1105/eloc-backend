@@ -13,26 +13,28 @@ var (
 )
 
 type Payload struct {
-	ID        uuid.UUID `json:"id"`
-	UserID    int64     `json:"user_id"`
-	Email     string    `json:"email"`
-	Role      string    `json:"role"`
-	IssuedAt  time.Time `json:"issued_at"`
-	ExpiredAt time.Time `json:"expired_at"`
+	ID         uuid.UUID `json:"id"`
+	UserID     int64     `json:"user_id"`
+	Email      string    `json:"email"`
+	Role       string    `json:"role"`
+	IsVerified bool      `json:"is_verified"`
+	IssuedAt   time.Time `json:"issued_at"`
+	ExpiredAt  time.Time `json:"expired_at"`
 }
 
-func NewPayload(userID int64, email string, role string, duration time.Duration) (*Payload, error) {
+func NewPayload(userID int64, email string, role string, isVerified bool, duration time.Duration) (*Payload, error) {
 	tokenID, err := uuid.NewRandom()
 	if err != nil {
 		return nil, err
 	}
 	payload := &Payload{
-		ID:        tokenID,
-		UserID:    userID,
-		Email:     email,
-		Role:      role,
-		IssuedAt:  time.Now(),
-		ExpiredAt: time.Now().Add(duration),
+		ID:         tokenID,
+		UserID:     userID,
+		Email:      email,
+		Role:       role,
+		IsVerified: isVerified,
+		IssuedAt:   time.Now(),
+		ExpiredAt:  time.Now().Add(duration),
 	}
 	return payload, nil
 }

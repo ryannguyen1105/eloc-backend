@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/ryannguyen1105/eloc-backend/common/middleware"
 	"github.com/ryannguyen1105/eloc-backend/common/token"
 	"github.com/ryannguyen1105/eloc-backend/services/eloc_auth/config"
 	db "github.com/ryannguyen1105/eloc-backend/services/eloc_auth/db/sqlc"
@@ -43,8 +44,11 @@ func (server *Server) setupRouter() {
 	{
 		userRouters.POST("", server.createUser)
 		userRouters.POST("/login", server.loginUser)
-		userRouters.PATCH("/update", server.UpdateUserDetail)
-		userRouters.DELETE("/delete", server.deleteUser)
+	}
+	authRouters := router.Group("/users").Use(middleware.AuthMiddleware(server.tokenMaker))
+	{
+		authRouters.PATCH("/update", server.UpdateUserDetail)
+		authRouters.DELETE("/delete", server.deleteUser)
 	}
 
 	server.router = router

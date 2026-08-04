@@ -79,6 +79,25 @@ func TestUpdateUserDetail(t *testing.T) {
 
 }
 
+func TestUpdateUserPassword(t *testing.T) {
+	role := createRandomRole(t)
+	user1 := createRandomUser(t, role)
+	arg := UpdateUserPasswordParams{
+		ID: user1.ID,
+		PasswordHash: user1.PasswordHash,
+	}
+	user2, err := testQueries.UpdateUserPassword(context.Background(), arg)
+	require.NoError(t, err)
+	require.NotEmpty(t, user2)
+
+	require.Equal(t, user1.ID, user2.ID)
+	require.Equal(t, user1.Email, user2.Email)
+	require.Equal(t, user1.IsActive, user2.IsActive)
+	require.Equal(t, user1.IsVerified, user2.IsVerified)
+	require.WithinDuration(t, user1.CreatedAt, user2.CreatedAt, time.Second)
+	require.WithinDuration(t, time.Now(), user2.UpdatedAt, time.Second)
+}
+
 func TestUpdateUserStatus(t *testing.T) {
 	role := createRandomRole(t)
 	user1 := createRandomUser(t, role)

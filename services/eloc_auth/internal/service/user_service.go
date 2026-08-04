@@ -24,6 +24,10 @@ type UpdateUserDetailDTO struct {
 	FullName string
 }
 
+type UpdateUserPasswordDTO struct {
+	Password string
+}
+
 type UpdateUserStatusDTO struct {
 	IsActive   bool
 	IsVerified bool
@@ -72,6 +76,13 @@ func (userService *AuthService) UpdateUserDetail(ctx context.Context, dto Update
 		Fullname:     dto.FullName,
 	}
 	return userService.store.UpdateUserDetail(ctx, arg)
+}
+
+func (userService *AuthService) UpdateUserPassword(ctx context.Context, dto UpdateUserPasswordDTO) (db.User, error) {
+	arg := db.UpdateUserPasswordParams{
+		PasswordHash: dto.Password,
+	}
+	return userService.store.UpdateUserPassword(ctx, arg)
 }
 
 func (userService *AuthService) DeleteUser(ctx context.Context, dto DeleteUserDTO) (db.User, error) {
