@@ -156,7 +156,7 @@ func newUpdatedUserResponse(user db.User) updatedUserResponse {
 		UpdatedAt:  user.UpdatedAt,
 		Role:       user.RoleID,
 	}
-} 
+}
 
 func (server *Server) UpdateUserDetail(ctx *gin.Context) {
 	payload, err := middleware.GetAuthPayload(ctx)
@@ -196,6 +196,55 @@ func (server *Server) UpdateUserDetail(ctx *gin.Context) {
 		return
 	}
 	rsp := newUpdatedUserResponse(updatedUser)
+	ctx.JSON(http.StatusOK, rsp)
+}
+
+type updateUserPasswordRequest struct {
+	OldPassword string `json:"old_password" binding:"required,min=6"`
+	NewPassword string `json:"new_password" binding:"required,min=6"`
+}
+
+func (server *Server) updateUserPassword(ctx *gin.Context) {
+	payload, err := middleware.GetAuthPayload(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+	var req updateUserPasswordRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+	user, err := server.store.GetUserByEmail(ctx, db.GetUserByEmailParams{
+		Email: payload.Email,
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found with this email"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	err = util.CheckPasswordHash(req.OldPassword, user.PasswordHash)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	newHashedPassword, err := util.HashPassword(req.NewPassword)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	updateUser, err := server.store.UpdateUserPassword(ctx, db.UpdateUserPasswordParams{
+		ID:           user.ID,
+		PasswordHash: newHashedPassword,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	rsp := newUpdatedUserResponse(updateUser)
 	ctx.JSON(http.StatusOK, rsp)
 }
 
