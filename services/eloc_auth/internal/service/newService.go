@@ -17,5 +17,5 @@ func NewAuthService(store db.Store, tokenMaker token.Maker, config config.Config
 		store:      store,
 		tokenMaker: tokenMaker,
 		config:     config,
-	}
+	} 
 }

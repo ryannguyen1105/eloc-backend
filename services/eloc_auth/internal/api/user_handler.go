@@ -14,13 +14,6 @@ import (
 	"github.com/ryannguyen1105/eloc-backend/services/eloc_auth/internal/service"
 )
 
-type createUserRequest struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=6"`
-	FullName string `json:"full_name" binding:"required"`
-	Role     string `json:"role" binding:"required,uppercase,oneof=ADMIN STAFF CUSTOMER"`
-}
-
 type userResponse struct {
 	Email      string    `json:"email"`
 	FullName   string    `json:"full_name"`
@@ -41,20 +34,22 @@ func newUserResponse(user db.User) userResponse {
 	}
 }
 
+type createUserRequest struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=6"`
+	FullName string `json:"full_name" binding:"required"`
+	Role     string `json:"role" binding:"required,uppercase,oneof=ADMIN STAFF CUSTOMER"`
+}
+
 func (server *Server) createUser(ctx *gin.Context) {
 	var req createUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	hashPassword, err := util.HashPassword(req.Password)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
 	dto := service.CreateUserDTO{
 		Email:    req.Email,
-		Password: hashPassword,
+		Password: req.Password,
 		FullName: req.FullName,
 		Role:     req.Role,
 	}
@@ -95,9 +90,12 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	user, err := server.store.GetUserByEmail(ctx, db.GetUserByEmailParams{
-		Email: req.Email,
-	})
+	dto := service.LoginUserDTO{
+		Email:    req.Email,
+		Password: req.Password,
+	}
+
+	user, err := server.authService.LoginUser(ctx, dto)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusUnauthorized, errorResponse(err))
@@ -106,13 +104,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	err = util.CheckPasswordHash(req.Password, user.PasswordHash)
-	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
-		return
-	}
-	token, err := server.tokenMaker.CreateToken(user.ID,
-		user.Email, user.RoleID, user.IsVerified, server.config.AccessTokenDuration)
+	token, err := server.tokenMaker.CreateToken(user.ID, user.Email, user.RoleID, user.IsVerified, server.config.AccessTokenDuration)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
