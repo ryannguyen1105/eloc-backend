@@ -9,9 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
 	"github.com/ryannguyen1105/eloc-backend/common/middleware"
-	"github.com/ryannguyen1105/eloc-backend/common/util"
 	db "github.com/ryannguyen1105/eloc-backend/services/eloc_auth/db/sqlc"
 	"github.com/ryannguyen1105/eloc-backend/services/eloc_auth/internal/service"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type userResponse struct {
@@ -125,11 +125,6 @@ func (server *Server) loginUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, rsp)
 }
 
-type updateUserDetailRequest struct {
-	Password string `json:"password" binding:"required,min=6"`
-	FullName string `json:"full_name" binding:"required"`
-}
-
 type updatedUserResponse struct {
 	Email      string    `json:"email"`
 	FullName   string    `json:"full_name"`
@@ -150,45 +145,50 @@ func newUpdatedUserResponse(user db.User) updatedUserResponse {
 	}
 }
 
-func (server *Server) UpdateUserDetail(ctx *gin.Context) {
+type updateUserFullNameRequest struct {
+	OldName  string `json:"old_name" binding:"required"`
+	NewName  string `json:"new_name" binding:"required"`
+	Password string `json:"password" binding:"required,min=6"`
+}
+
+func (server *Server) updateUserFullName(ctx *gin.Context) {
 	payload, err := middleware.GetAuthPayload(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
-	var req updateUserDetailRequest
+	var req updateUserFullNameRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	user, err := server.store.GetUserByEmail(ctx, db.GetUserByEmailParams{
-		Email: payload.Email,
-	})
+	dto := service.UpdateUserFullnameDTO{
+		Email:    payload.Email,
+		OldName:  req.OldName,
+		NewName:  req.NewName,
+		Password: req.Password,
+	}
+	updatedUser, err := server.authService.UpdateUserFullname(ctx, dto)
 	if err != nil {
+		if errors.Is(err, service.ErrOldNameMismatch) || errors.Is(err, service.ErrSameName) {
+			ctx.JSON(http.StatusBadRequest, errorResponse(err))
+			return
+		}
+
 		if errors.Is(err, sql.ErrNoRows) {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found with this email"})
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	hashedPassword, err := util.HashPassword(req.Password)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
-	updatedUser, err := server.store.UpdateUserDetail(ctx, db.UpdateUserDetailParams{
-		ID:           user.ID,
-		PasswordHash: hashedPassword,
-		Fullname:     req.FullName,
-		RoleID:       user.RoleID,
-	})
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
 	rsp := newUpdatedUserResponse(updatedUser)
 	ctx.JSON(http.StatusOK, rsp)
+
 }
 
 type updateUserPasswordRequest struct {
@@ -207,74 +207,29 @@ func (server *Server) updateUserPassword(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	user, err := server.store.GetUserByEmail(ctx, db.GetUserByEmailParams{
-		Email: payload.Email,
-	})
+	dto := service.UpdateUserPasswordDTO{
+		Email:       payload.Email,
+		OldPassword: req.OldPassword,
+		NewPassword: req.NewPassword,
+	}
+	updatedUser, err := server.authService.UpdateUserPassword(ctx, dto)
 	if err != nil {
+		if errors.Is(err, service.ErrSamePassword) {
+			ctx.JSON(http.StatusBadRequest, errorResponse(err))
+			return
+		}
+
 		if errors.Is(err, sql.ErrNoRows) {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found with this email"})
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	err = util.CheckPasswordHash(req.OldPassword, user.PasswordHash)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
-	newHashedPassword, err := util.HashPassword(req.NewPassword)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
-	updateUser, err := server.store.UpdateUserPassword(ctx, db.UpdateUserPasswordParams{
-		ID:           user.ID,
-		PasswordHash: newHashedPassword,
-	})
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
-	rsp := newUpdatedUserResponse(updateUser)
+	rsp := newUpdatedUserResponse(updatedUser)
 	ctx.JSON(http.StatusOK, rsp)
-}
-
-type deleteUserRequest struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=6"`
-}
-
-func (server *Server) deleteUser(ctx *gin.Context) {
-	var req deleteUserRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
-	user, err := server.store.GetUserByEmail(ctx, db.GetUserByEmailParams{
-		Email: req.Email,
-	})
-	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
-	err = util.CheckPasswordHash(req.Password, user.PasswordHash)
-	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
-		return
-	}
-	err = server.store.DeleteUser(ctx, db.DeleteUserParams{
-		Email: req.Email,
-	})
-	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return
-		}
-	}
-	ctx.JSON(http.StatusOK, gin.H{"message": "deleted successful"})
 }

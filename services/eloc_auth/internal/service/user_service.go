@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/ryannguyen1105/eloc-backend/common/util"
 	db "github.com/ryannguyen1105/eloc-backend/services/eloc_auth/db/sqlc"
@@ -49,27 +50,41 @@ func (userService *AuthService) LoginUser(ctx context.Context, dto LoginUserDTO)
 	return user, nil
 }
 
-type UpdateUserDetailDTO struct {
+type UpdateUserFullnameDTO struct {
 	Email    string
+	OldName  string
+	NewName  string
 	Password string
-	FullName string
 }
 
-func (userService *AuthService) UpdateUserDetail(ctx context.Context, dto UpdateUserDetailDTO) (db.User, error) {
+var (
+	ErrOldNameMismatch = errors.New("old name does not match current name")
+	ErrSameName        = errors.New("new name cannot be the same as current name")
+)
+
+func (userService *AuthService) UpdateUserFullname(ctx context.Context, dto UpdateUserFullnameDTO) (db.User, error) {
 	user, err := userService.store.GetUserByEmail(ctx, db.GetUserByEmailParams{
 		Email: dto.Email,
 	})
 	if err != nil {
-		return db.User{}, nil
+		return db.User{}, err
+	}
+	if err := util.CheckPasswordHash(dto.Password, user.PasswordHash); err != nil {
+		return db.User{}, err
+	}
+	if user.Fullname != dto.OldName {
+		return db.User{}, ErrOldNameMismatch
 	}
 
-	arg := db.UpdateUserDetailParams{
-		ID:           user.ID,
-		PasswordHash: user.PasswordHash,
-		Fullname:     dto.FullName,
-		RoleID:       user.RoleID,
+	if user.Fullname == dto.NewName {
+		return db.User{}, ErrSameName
 	}
-	return userService.store.UpdateUserDetail(ctx, arg)
+
+	arg := db.UpdateUserFullnameParams{
+		ID:       user.ID,
+		Fullname: dto.NewName,
+	}
+	return userService.store.UpdateUserFullname(ctx, arg)
 }
 
 type UpdateUserPasswordDTO struct {
@@ -78,47 +93,29 @@ type UpdateUserPasswordDTO struct {
 	NewPassword string
 }
 
+var ErrSamePassword = errors.New("new password cannot be the same as old password")
+
 func (userService *AuthService) UpdateUserPassword(ctx context.Context, dto UpdateUserPasswordDTO) (db.User, error) {
+	if dto.OldPassword == dto.NewPassword {
+		return db.User{}, ErrSamePassword
+	}
+
 	user, err := userService.store.GetUserByEmail(ctx, db.GetUserByEmailParams{
 		Email: dto.Email,
 	})
 	if err != nil {
-		return db.User{}, nil
+		return db.User{}, err
 	}
 	if err := util.CheckPasswordHash(dto.OldPassword, user.PasswordHash); err != nil {
-		return db.User{}, nil
+		return db.User{}, err
 	}
 	newHashedPassword, err := util.HashPassword(dto.NewPassword)
 	if err != nil {
-		return db.User{}, nil
+		return db.User{}, err
 	}
 	arg := db.UpdateUserPasswordParams{
 		ID:           user.ID,
 		PasswordHash: newHashedPassword,
 	}
 	return userService.store.UpdateUserPassword(ctx, arg)
-}
-
-type DeleteUserDTO struct {
-	Email    string
-	Password string
-}
-
-func (userService *AuthService) DeleteUser(ctx context.Context, dto DeleteUserDTO) (db.User, error) {
-	user, err := userService.store.GetUserByEmail(ctx, db.GetUserByEmailParams{
-		Email: dto.Email,
-	})
-	if err != nil {
-		return db.User{}, err
-	}
-	if err := util.CheckPasswordHash(dto.Password, user.PasswordHash); err != nil {
-		return db.User{}, nil
-	}
-	err = userService.store.DeleteUser(ctx, db.DeleteUserParams{
-		Email: user.Email,
-	})
-	if err != nil {
-		return db.User{}, err
-	}
-	return user, nil
 }

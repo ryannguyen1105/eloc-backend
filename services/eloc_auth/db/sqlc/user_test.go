@@ -56,27 +56,24 @@ func TestGetUserByEmail(t *testing.T) {
 
 }
 
-func TestUpdateUserDetail(t *testing.T) {
+func TestUpdateUserFullname(t *testing.T) {
 	role := createRandomRole(t)
 	user1 := createRandomUser(t, role)
-	arg := UpdateUserDetailParams{
-		ID:       user1.ID,
+	arg := UpdateUserFullnameParams{
+		ID: user1.ID,
 		Fullname: user1.Fullname,
-		RoleID:   role.ID,
 	}
-	user2, err := testQueries.UpdateUserDetail(context.Background(), arg)
+	user2, err := testQueries.UpdateUserFullname(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, user2)
 
 	require.Equal(t, user1.ID, user2.ID)
 	require.Equal(t, user1.Email, user2.Email)
-	require.Equal(t, arg.Fullname, user2.Fullname)
-	require.Equal(t, arg.RoleID, user2.RoleID)
+	require.Equal(t, user1.PasswordHash, user2.PasswordHash)
 	require.Equal(t, user1.IsActive, user2.IsActive)
 	require.Equal(t, user1.IsVerified, user2.IsVerified)
 	require.WithinDuration(t, user1.CreatedAt, user2.CreatedAt, time.Second)
 	require.WithinDuration(t, time.Now(), user2.UpdatedAt, time.Second)
-
 }
 
 func TestUpdateUserPassword(t *testing.T) {
@@ -92,6 +89,7 @@ func TestUpdateUserPassword(t *testing.T) {
 
 	require.Equal(t, user1.ID, user2.ID)
 	require.Equal(t, user1.Email, user2.Email)
+	require.Equal(t, user1.PasswordHash, user2.PasswordHash)
 	require.Equal(t, user1.IsActive, user2.IsActive)
 	require.Equal(t, user1.IsVerified, user2.IsVerified)
 	require.WithinDuration(t, user1.CreatedAt, user2.CreatedAt, time.Second)

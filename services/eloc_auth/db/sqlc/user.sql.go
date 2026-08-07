@@ -189,6 +189,37 @@ func (q *Queries) UpdateUserDetail(ctx context.Context, arg UpdateUserDetailPara
 	return i, err
 }
 
+const updateUserFullname = `-- name: UpdateUserFullname :one
+UPDATE users
+SET
+  fullname = $2,
+  updated_at = now()
+WHERE id = $1
+RETURNING id, email, password_hash, fullname, role_id, is_active, is_verified, created_at, updated_at
+`
+
+type UpdateUserFullnameParams struct {
+	ID       int64
+	Fullname string
+}
+
+func (q *Queries) UpdateUserFullname(ctx context.Context, arg UpdateUserFullnameParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, updateUserFullname, arg.ID, arg.Fullname)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.PasswordHash,
+		&i.Fullname,
+		&i.RoleID,
+		&i.IsActive,
+		&i.IsVerified,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const updateUserPassword = `-- name: UpdateUserPassword :one
 UPDATE users
 SET 
