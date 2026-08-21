@@ -100,7 +100,7 @@ func TestUpdateCategory(t *testing.T) {
 func TestDeleteCategory(t *testing.T) {
 	category1 := createRandomCategory(t)
 	deleteArg := DeleteCategoryParams {
-		Name: category1.Name,
+		ID: category1.ID,
 	}
 	err := testQueries.DeleteCategory(context.Background(), deleteArg)
 	require.NoError(t, err)

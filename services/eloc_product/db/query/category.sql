@@ -32,4 +32,4 @@ WHERE id = $1;
 
 -- name: DeleteCategory :exec
 DELETE FROM categories
-WHERE name = $1;
+WHERE id = $1;

@@ -2,17 +2,13 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	db "github.com/ryannguyen1105/eloc-backend/services/eloc_product/db/sqlc"
 	"github.com/ryannguyen1105/eloc-backend/services/eloc_product/internal/service"
 )
-
-type createCategoryRequest struct {
-	Name string `json:"name" binding:"required"`
-	Slug string `json:"slug" binding:"required"`
-}
 
 type categoryResponse struct {
 	Name string `json:"name"`
@@ -24,6 +20,11 @@ func newCategoryResponse(category db.Category) categoryResponse {
 		Name: category.Name,
 		Slug: category.Slug,
 	}
+}
+
+type createCategoryRequest struct {
+	Name string `json:"name" binding:"required"`
+	Slug string `json:"slug" binding:"required"`
 }
 
 func (server *Server) createCategory(ctx *gin.Context) {
@@ -46,7 +47,7 @@ func (server *Server) createCategory(ctx *gin.Context) {
 }
 
 type getCategoryRequest struct {
-	Name string `json:"name" binding:"required"`
+	ID int64 `json:"id" binding:"required,min=1"`
 }
 
 func (server *Server) getCategory(ctx *gin.Context) {
@@ -56,10 +57,14 @@ func (server *Server) getCategory(ctx *gin.Context) {
 		return
 	}
 	dto := service.GetCategoryDTO{
-		Name: req.Name,
+		ID: req.ID,
 	}
 	category, err := server.productService.GetCategory(ctx, dto)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
@@ -68,7 +73,7 @@ func (server *Server) getCategory(ctx *gin.Context) {
 }
 
 type deleteCategoryRequest struct {
-	Name string `json:"name" binding:"required"`
+	ID int64 `json:"id" binding:"required"`
 }
 
 func (server *Server) deleteCategory(ctx *gin.Context) {
@@ -77,25 +82,17 @@ func (server *Server) deleteCategory(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	category, err := server.store.GetCategoryByName(ctx, db.GetCategoryByNameParams{
-		Name: req.Name,
-	})
+	dto := service.DeleteCategoryDTO{
+		ID: req.ID,
+	}
+	category, err := server.productService.DeleteCategory(ctx, dto)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
+		if errors.Is(err, sql.ErrNoRows) {
+			ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
-	}
-	err = server.store.DeleteCategory(ctx, db.DeleteCategoryParams{
-		Name: req.Name,
-	})
-	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return
-		}
 	}
 	ctx.JSON(http.StatusOK,gin.H{"message": "deleted successful", "data": category})
 }
