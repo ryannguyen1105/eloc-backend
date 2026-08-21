@@ -9,18 +9,27 @@ import (
 	"context"
 )
 
-const clearUserCart = `-- name: ClearUserCart :exec
+const clearUserCart = `-- name: ClearUserCart :one
 DELETE FROM carts
 WHERE user_id = $1
+RETURNING user_id, product_id, quantity, created_at, updated_at
 `
 
 type ClearUserCartParams struct {
 	UserID int64
 }
 
-func (q *Queries) ClearUserCart(ctx context.Context, arg ClearUserCartParams) error {
-	_, err := q.db.ExecContext(ctx, clearUserCart, arg.UserID)
-	return err
+func (q *Queries) ClearUserCart(ctx context.Context, arg ClearUserCartParams) (Cart, error) {
+	row := q.db.QueryRowContext(ctx, clearUserCart, arg.UserID)
+	var i Cart
+	err := row.Scan(
+		&i.UserID,
+		&i.ProductID,
+		&i.Quantity,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const createCart = `-- name: CreateCart :one
@@ -94,9 +103,10 @@ func (q *Queries) GetUserCart(ctx context.Context, arg GetUserCartParams) ([]Car
 	return items, nil
 }
 
-const removeFromCart = `-- name: RemoveFromCart :exec
+const removeFromCart = `-- name: RemoveFromCart :one
 DELETE FROM carts
 WHERE user_id = $1 AND product_id = $2
+RETURNING user_id, product_id, quantity, created_at, updated_at
 `
 
 type RemoveFromCartParams struct {
@@ -104,9 +114,17 @@ type RemoveFromCartParams struct {
 	ProductID int64
 }
 
-func (q *Queries) RemoveFromCart(ctx context.Context, arg RemoveFromCartParams) error {
-	_, err := q.db.ExecContext(ctx, removeFromCart, arg.UserID, arg.ProductID)
-	return err
+func (q *Queries) RemoveFromCart(ctx context.Context, arg RemoveFromCartParams) (Cart, error) {
+	row := q.db.QueryRowContext(ctx, removeFromCart, arg.UserID, arg.ProductID)
+	var i Cart
+	err := row.Scan(
+		&i.UserID,
+		&i.ProductID,
+		&i.Quantity,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const updateCartQuantity = `-- name: UpdateCartQuantity :one

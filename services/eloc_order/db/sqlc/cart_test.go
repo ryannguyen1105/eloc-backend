@@ -76,7 +76,7 @@ func TestRemoveFromCart(t *testing.T) {
 		UserID:    cart1.UserID,
 		ProductID: cart1.ProductID,
 	}
-	err := testQueries.RemoveFromCart(context.Background(), arg)
+	_, err := testQueries.RemoveFromCart(context.Background(), arg)
 	require.NoError(t, err)
 
 	getArg := GetUserCartParams{
@@ -86,7 +86,7 @@ func TestRemoveFromCart(t *testing.T) {
 	require.NoError(t, err)
 
 	for _, cart := range cart2 {
-	require.NotEqual(t, cart1.ProductID, cart.ProductID)
+		require.NotEqual(t, cart1.ProductID, cart.ProductID)
 	}
 }
 
@@ -95,7 +95,7 @@ func TestClearUserCart(t *testing.T) {
 	arg := ClearUserCartParams{
 		UserID: cart1.UserID,
 	}
-	err := testQueries.ClearUserCart(context.Background(), arg)
+	_, err := testQueries.ClearUserCart(context.Background(), arg)
 	require.NoError(t, err)
 
 	getArg := GetUserCartParams{

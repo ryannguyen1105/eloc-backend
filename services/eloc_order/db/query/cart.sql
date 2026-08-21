@@ -24,10 +24,12 @@ updated_at = now()
 WHERE user_id = $1 AND product_id = $2
 RETURNING *;
 
--- name: RemoveFromCart :exec
+-- name: RemoveFromCart :one
 DELETE FROM carts
-WHERE user_id = $1 AND product_id = $2;
+WHERE user_id = $1 AND product_id = $2
+RETURNING *;
 
--- name: ClearUserCart :exec
+-- name: ClearUserCart :one
 DELETE FROM carts
-WHERE user_id = $1;
+WHERE user_id = $1
+RETURNING *;
