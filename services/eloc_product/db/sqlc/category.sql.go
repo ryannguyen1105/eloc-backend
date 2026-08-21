@@ -30,18 +30,21 @@ func (q *Queries) CreateCategory(ctx context.Context, arg CreateCategoryParams) 
 	return i, err
 }
 
-const deleteCategory = `-- name: DeleteCategory :exec
+const deleteCategory = `-- name: DeleteCategory :one
 DELETE FROM categories
 WHERE id = $1
+RETURNING id, name, slug
 `
 
 type DeleteCategoryParams struct {
 	ID int64
 }
 
-func (q *Queries) DeleteCategory(ctx context.Context, arg DeleteCategoryParams) error {
-	_, err := q.db.ExecContext(ctx, deleteCategory, arg.ID)
-	return err
+func (q *Queries) DeleteCategory(ctx context.Context, arg DeleteCategoryParams) (Category, error) {
+	row := q.db.QueryRowContext(ctx, deleteCategory, arg.ID)
+	var i Category
+	err := row.Scan(&i.ID, &i.Name, &i.Slug)
+	return i, err
 }
 
 const getCategoryByID = `-- name: GetCategoryByID :one

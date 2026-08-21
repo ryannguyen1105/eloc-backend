@@ -30,6 +30,7 @@ UPDATE categories
   slug = $3
 WHERE id = $1;
 
--- name: DeleteCategory :exec
+-- name: DeleteCategory :one
 DELETE FROM categories
-WHERE id = $1;
+WHERE id = $1
+RETURNING *;

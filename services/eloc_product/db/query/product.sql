@@ -53,9 +53,10 @@ UPDATE products
 SET 
     stock = stock + $2,
     updated_at = now()
-WHERE name = $1
+WHERE id = $1
 RETURNING *;
 
--- name: DeleteProduct :exec
+-- name: DeleteProduct :one
 DELETE FROM products
-WHERE name = $1;
+WHERE id = $1
+RETURNING *;

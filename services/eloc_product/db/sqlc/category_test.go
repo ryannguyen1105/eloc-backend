@@ -32,7 +32,7 @@ func TestCreateCategory(t *testing.T) {
 
 func TestGetCategoryByID(t *testing.T) {
 	category1 := createRandomCategory(t)
-	arg := GetCategoryByIDParams {
+	arg := GetCategoryByIDParams{
 		ID: category1.ID,
 	}
 	category2, err := testQueries.GetCategoryByID(context.Background(), arg)
@@ -47,7 +47,7 @@ func TestGetCategoryByID(t *testing.T) {
 
 func TestGetCategoryBySlug(t *testing.T) {
 	category1 := createRandomCategory(t)
-	arg := GetCategoryBySlugParams {
+	arg := GetCategoryBySlugParams{
 		Slug: category1.Slug,
 	}
 	category2, err := testQueries.GetCategoryBySlug(context.Background(), arg)
@@ -62,7 +62,7 @@ func TestGetCategoryBySlug(t *testing.T) {
 
 func TestGetCategoryByName(t *testing.T) {
 	category1 := createRandomCategory(t)
-	arg := GetCategoryByNameParams {
+	arg := GetCategoryByNameParams{
 		Name: category1.Name,
 	}
 	category2, err := testQueries.GetCategoryByName(context.Background(), arg)
@@ -77,15 +77,15 @@ func TestGetCategoryByName(t *testing.T) {
 
 func TestUpdateCategory(t *testing.T) {
 	category1 := createRandomCategory(t)
-	updateArg := UpdateCategoryParams {
-		ID: category1.ID,
+	updateArg := UpdateCategoryParams{
+		ID:   category1.ID,
 		Name: util.RandomNameCategory(),
 		Slug: util.RandomSlug(),
 	}
 	err := testQueries.UpdateCategory(context.Background(), updateArg)
 	require.NoError(t, err)
 
-	arg := GetCategoryByIDParams {
+	arg := GetCategoryByIDParams{
 		ID: updateArg.ID,
 	}
 	category2, err := testQueries.GetCategoryByID(context.Background(), arg)
@@ -99,13 +99,13 @@ func TestUpdateCategory(t *testing.T) {
 
 func TestDeleteCategory(t *testing.T) {
 	category1 := createRandomCategory(t)
-	deleteArg := DeleteCategoryParams {
+	deleteArg := DeleteCategoryParams{
 		ID: category1.ID,
 	}
-	err := testQueries.DeleteCategory(context.Background(), deleteArg)
+	_, err := testQueries.DeleteCategory(context.Background(), deleteArg)
 	require.NoError(t, err)
 
-	arg := GetCategoryByIDParams {
+	arg := GetCategoryByIDParams{
 		ID: category1.ID,
 	}
 	category2, err := testQueries.GetCategoryByID(context.Background(), arg)
@@ -119,8 +119,8 @@ func TestListCategories(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		createRandomCategory(t)
 	}
-	arg := ListCategoriesParams {
-		Limit: 5,
+	arg := ListCategoriesParams{
+		Limit:  5,
 		Offset: 0,
 	}
 	categories, err := testQueries.ListCategories(context.Background(), arg)

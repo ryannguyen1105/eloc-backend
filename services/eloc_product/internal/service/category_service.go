@@ -41,11 +41,8 @@ func (productService *ProductService) DeleteCategory(ctx context.Context, dto De
 	if err != nil {
 		return db.Category{}, err
 	}
-	err = productService.store.DeleteCategory(ctx, db.DeleteCategoryParams{
+	arg := db.DeleteCategoryParams{
 		ID: category.ID,
-	})
-	if err != nil {
-		return db.Category{}, err
 	}
-	return category, nil
+	return productService.store.DeleteCategory(ctx, arg)
 }

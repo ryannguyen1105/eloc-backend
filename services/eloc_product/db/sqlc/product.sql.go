@@ -57,18 +57,32 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 	return i, err
 }
 
-const deleteProduct = `-- name: DeleteProduct :exec
+const deleteProduct = `-- name: DeleteProduct :one
 DELETE FROM products
-WHERE name = $1
+WHERE id = $1
+RETURNING id, category_id, name, slug, sku, price, stock, attributes, created_at, updated_at
 `
 
 type DeleteProductParams struct {
-	Name string
+	ID int64
 }
 
-func (q *Queries) DeleteProduct(ctx context.Context, arg DeleteProductParams) error {
-	_, err := q.db.ExecContext(ctx, deleteProduct, arg.Name)
-	return err
+func (q *Queries) DeleteProduct(ctx context.Context, arg DeleteProductParams) (Product, error) {
+	row := q.db.QueryRowContext(ctx, deleteProduct, arg.ID)
+	var i Product
+	err := row.Scan(
+		&i.ID,
+		&i.CategoryID,
+		&i.Name,
+		&i.Slug,
+		&i.Sku,
+		&i.Price,
+		&i.Stock,
+		&i.Attributes,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const getProductByID = `-- name: GetProductByID :one
@@ -325,17 +339,17 @@ UPDATE products
 SET 
     stock = stock + $2,
     updated_at = now()
-WHERE name = $1
+WHERE id = $1
 RETURNING id, category_id, name, slug, sku, price, stock, attributes, created_at, updated_at
 `
 
 type UpdateProductStockParams struct {
-	Name  string
+	ID    int64
 	Stock int32
 }
 
 func (q *Queries) UpdateProductStock(ctx context.Context, arg UpdateProductStockParams) (Product, error) {
-	row := q.db.QueryRowContext(ctx, updateProductStock, arg.Name, arg.Stock)
+	row := q.db.QueryRowContext(ctx, updateProductStock, arg.ID, arg.Stock)
 	var i Product
 	err := row.Scan(
 		&i.ID,
