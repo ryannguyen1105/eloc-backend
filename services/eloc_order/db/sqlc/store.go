@@ -61,11 +61,11 @@ func (store *Store) OrderTx(ctx context.Context, arg OrderTxParams) (OrderTxResu
 		var err error
 
 		result.Order, err = q.CreateOrder(ctx, CreateOrderParams{
-			UserID: arg.UserID,
-			TotalAmount: arg.TotalAmount,
-			Status: arg.Status,
+			UserID:          arg.UserID,
+			TotalAmount:     arg.TotalAmount,
+			Status:          arg.Status,
 			ShippingAddress: arg.ShippingAddress,
-			CustomerPhone: arg.CustomerPhone,
+			CustomerPhone:   arg.CustomerPhone,
 		})
 		if err != nil {
 			return err
@@ -73,16 +73,16 @@ func (store *Store) OrderTx(ctx context.Context, arg OrderTxParams) (OrderTxResu
 		result.OrderItem = make([]OrderItem, len(arg.Items))
 		for i, item := range arg.Items {
 			result.OrderItem[i], err = q.CreateOrderItem(ctx, CreateOrderItemParams{
-				OrderID: result.Order.ID,
+				OrderID:   result.Order.ID,
 				ProductID: item.ProductID,
-				Quantity: item.Quantity,
-				Price: item.Quantity,
+				Quantity:  item.Quantity,
+				Price:     item.Quantity,
 			})
 			if err != nil {
 				return err
 			}
 		}
-		err = q.ClearUserCart(ctx, ClearUserCartParams{
+		_, err = q.ClearUserCart(ctx, ClearUserCartParams{
 			UserID: arg.UserID,
 		})
 		if err != nil {
