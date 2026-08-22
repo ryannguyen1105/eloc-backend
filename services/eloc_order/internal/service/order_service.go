@@ -15,22 +15,6 @@ type CreateOrderDTO struct {
 	CustomerPhone   string
 }
 
-type GetOrderDTO struct {
-	ID int64
-}
-
-type ListOrderDTO struct {
-	UserID int64
-	Page   int32
-	Limit  int32
-}
-
-type UpdateOrderStatusDTO struct {
-	ID        int64
-	Status    string
-	UpdatedAt time.Time
-}
-
 func (orderService *OrderService) CreateOrder(ctx context.Context, dto CreateOrderDTO) (db.Order, error) {
 	cart, err := orderService.store.GetUserCart(ctx, db.GetUserCartParams{
 		UserID: dto.UserID,
@@ -59,11 +43,21 @@ func (orderService *OrderService) CreateOrder(ctx context.Context, dto CreateOrd
 	return orderService.store.CreateOrder(ctx, arg)
 }
 
+type GetOrderDTO struct {
+	ID int64
+}
+
 func (orderService *OrderService) GetOrder(ctx context.Context, dto GetOrderDTO) (db.Order, error) {
 	arg := db.GetOrderParams{
 		ID: dto.ID,
 	}
 	return orderService.store.GetOrder(ctx, arg)
+}
+
+type ListOrderDTO struct {
+	UserID int64
+	Page   int32
+	Limit  int32
 }
 
 func (orderService *OrderService) ListOrder(ctx context.Context, dto ListOrderDTO) ([]db.ListUserOrdersRow, error) {
@@ -77,9 +71,15 @@ func (orderService *OrderService) ListOrder(ctx context.Context, dto ListOrderDT
 	return orderService.store.ListUserOrders(ctx, arg)
 }
 
-func (orderService *OrderService) UpdateOrderStatus (ctx context.Context, dto UpdateOrderStatusDTO) (db.Order, error) {
+type UpdateOrderStatusDTO struct {
+	ID        int64
+	Status    string
+	UpdatedAt time.Time
+}
+
+func (orderService *OrderService) UpdateOrderStatus(ctx context.Context, dto UpdateOrderStatusDTO) (db.Order, error) {
 	arg := db.UpdateOrderStatusParams{
-		ID: dto.ID,
+		ID:     dto.ID,
 		Status: dto.Status,
 	}
 	return orderService.store.UpdateOrderStatus(ctx, arg)

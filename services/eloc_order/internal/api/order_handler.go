@@ -10,12 +10,6 @@ import (
 	"github.com/ryannguyen1105/eloc-backend/services/eloc_order/internal/service"
 )
 
-type createOrderRequest struct {
-	UserID          int64  `json:"user_id" binding:"required,min=1"`
-	ShippingAddress string `json:"shipping_address" binding:"required"`
-	CustomerPhone   string `json:"customer_phone" binding:"required,min=1"`
-}
-
 type orderResponse struct {
 	ID              int64     `json:"id"`
 	UserID          int64     `json:"user_id"`
@@ -36,6 +30,12 @@ func newOrderResponse(order db.Order) orderResponse {
 		CustomerPhone:   order.CustomerPhone,
 		CreatedAt:       order.CreatedAt,
 	}
+}
+
+type createOrderRequest struct {
+	UserID          int64  `json:"user_id" binding:"required,min=1"`
+	ShippingAddress string `json:"shipping_address" binding:"required"`
+	CustomerPhone   string `json:"customer_phone" binding:"required,min=1"`
 }
 
 func (server *Server) createOrder(ctx *gin.Context) {
@@ -124,11 +124,6 @@ func (server *Server) listOrder(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, rsp)
 }
 
-type updateOrderStatusRequest struct {
-	ID     int64  `json:"id" binding:"required,min=1"`
-	Status string `json:"status" binding:"required,oneof= pending shipping delivered"`
-}
-
 type updateOrderStatusResponse struct {
 	ID              int64     `json:"id"`
 	UserID          int64     `json:"user_id"`
@@ -139,32 +134,36 @@ type updateOrderStatusResponse struct {
 	UpdatedAt       time.Time `json:"updated_at"`
 }
 
-func newUpdateOrderStatusResponse(order db.Order) updateOrderStatusResponse{
+func newUpdateOrderStatusResponse(order db.Order) updateOrderStatusResponse {
 	return updateOrderStatusResponse{
-		ID: order.ID,
-		UserID: order.UserID,
-		TotalAmount: order.TotalAmount,
-		Status: order.Status,
+		ID:              order.ID,
+		UserID:          order.UserID,
+		TotalAmount:     order.TotalAmount,
+		Status:          order.Status,
 		ShippingAddress: order.ShippingAddress,
-		CustomerPhone: order.CustomerPhone,
-		UpdatedAt: order.UpdatedAt,
-
+		CustomerPhone:   order.CustomerPhone,
+		UpdatedAt:       order.UpdatedAt,
 	}
-} 
+}
 
-func (server *Server) updateOrderStatus (ctx *gin.Context) {
+type updateOrderStatusRequest struct {
+	ID     int64  `json:"id" binding:"required,min=1"`
+	Status string `json:"status" binding:"required,oneof= pending shipping delivered"`
+}
+
+func (server *Server) updateOrderStatus(ctx *gin.Context) {
 	var req updateOrderStatusRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 	dto := service.UpdateOrderStatusDTO{
-		ID: req.ID,
+		ID:     req.ID,
 		Status: req.Status,
 	}
 	order, err := server.orderService.UpdateOrderStatus(ctx, dto)
 	if err != nil {
-		if err == sql.ErrNoRows{
+		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
