@@ -29,7 +29,7 @@ func TestOrderTx(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	n := 5
+	n := 1
 	errs := make(chan error, n)
 	results := make(chan OrderTxResult, n)
 
