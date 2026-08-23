@@ -1,6 +1,6 @@
 module github.com/ryannguyen1105/eloc-backend/services/eloc_auth
 
-go 1.27
+go 1.26.3
 
 require (
 	github.com/gin-gonic/gin v1.12.0
