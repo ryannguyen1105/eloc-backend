@@ -1,0 +1,76 @@
+version: "3.9"
+
+services:
+# --- 1. POSTGRESQL DATABASE ---
+  eloc-postgres:
+    image: postgres:18-alpine
+    container_name: eloc-postgres
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=secret123
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - eloc-network
+
+# 2. AUTH SERVICE
+  eloc_auth:
+    build:
+      context: .
+      dockerfile: services/eloc_auth/Dockerfile
+    container_name: eloc_auth
+    ports:
+      - "8080:8081"
+    env_file:
+      - services/eloc_auth/app.env
+    environment:
+      - DB_SOURCE=postgresql://root:secret123@eloc-postgres:5432/eloc_auth?sslmode=disable
+    depends_on:
+      - eloc-postgres
+    networks:
+      - eloc-network
+
+# 3. PRODUCT SERVICE
+  eloc_product:
+    build:
+      context: .
+      dockerfile: services/eloc_product/Dockerfile
+    container_name: eloc_product
+    ports:
+      - "8082:8081"
+    env_file:
+      - services/eloc_product/app.env
+    environment:
+      - DB_SOURCE=postgresql://root:secret123@eloc-postgres:5432/eloc_product?sslmode=disable
+    depends_on:
+      - eloc-postgres
+    networks:
+      - eloc-network
+
+# 3. ORDER SERVICE
+  eloc_order:
+    build:
+      context: .
+      dockerfile: services/eloc_order/Dockerfile
+    container_name: eloc_order
+    ports:
+      - "8083:8081"
+    env_file:
+      - services/eloc_order/app.env
+    environment:
+      - DB_SOURCE=postgresql://root:secret123@eloc-postgres:5432/eloc_order?sslmode=disable
+    depends_on:
+      - eloc-postgres
+    networks:
+      - eloc-network
+
+
+volumes:
+  postgres_data:
+
+networks:
+  eloc-network:
+    external: true
