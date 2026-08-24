@@ -11,6 +11,7 @@ FROM alpine:latest
 WORKDIR /app
 
 COPY --from=builder /app/services/eloc_product/main .
+COPY --from=builder /app/services/eloc_product/app.env .
 
 EXPOSE 8081
 

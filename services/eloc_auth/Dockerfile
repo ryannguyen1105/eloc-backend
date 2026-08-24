@@ -11,6 +11,7 @@ FROM alpine:latest
 WORKDIR /app
 
 COPY --from=builder /app/services/eloc_auth/main .
+COPY --from=builder /app/services/eloc_auth/app.env .
 
 EXPOSE 8081
 
