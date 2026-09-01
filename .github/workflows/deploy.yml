@@ -76,7 +76,7 @@ jobs:
 # Eloc_Product_Service
 
   product_service:
-    name: Auth Service (Test & Deploy)
+    name: Product Service (Test & Deploy)
     runs-on: ubuntu-latest
 
     defaults:
@@ -136,3 +136,67 @@ jobs:
 
       - name: Trigger Render Deploy
         run: curl -f -X POST ${{ secrets.RENDER_PRODUCT_DEPLOY_HOOK_URL }}
+
+  # Eloc_Order_Service
+
+  order_service:
+    name: Order Service (Test & Deploy)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: services/eloc_order
+
+    services:
+      postgres: 
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: secret123
+          POSTGRES_DB: eloc_order
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Check out code into Go module directory
+        uses: actions/checkout@v4
+
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v4
+        with:
+          go-version: ^1.26.3
+        id: go
+
+      - name: Install golang-migrate
+        run: |
+          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.19.1/migrate.linux-amd64.tar.gz | tar xvz
+          sudo mv migrate /usr/bin/migrate
+          which migrate
+
+      - name: Run migrations
+        run: make migrateup
+
+      - name: Test
+        run: make test
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: services/eloc_order/Dockerfile
+          push: true
+          tags: tainguyen2812/eloc_order:latest
+
+      - name: Trigger Render Deploy
+        run: curl -f -X POST ${{ secrets.RENDER_ORDER_DEPLOY_HOOK_URL }}
