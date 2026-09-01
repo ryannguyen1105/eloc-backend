@@ -64,7 +64,8 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v4
         with:
-          context: services/eloc_auth
+          context: .
+          file: services/eloc_auth/Dockerfile
           push: true
           tags: tainguyen2812/eloc_auth:latest
 
