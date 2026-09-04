@@ -31,4 +31,7 @@ type UserToken struct {
 	RefreshToken string
 	ExpiresAt    time.Time
 	CreatedAt    time.Time
+	UserAgent    string
+	ClientIp     string
+	IsBlocked    bool
 }

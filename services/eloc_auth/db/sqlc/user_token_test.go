@@ -41,7 +41,7 @@ func TestGetUserToken(t *testing.T) {
 
 	userToken1 := createRandomUserToken(t, user)
 	arg := GetUserTokenParams{
-		RefreshToken: userToken1.RefreshToken,
+		ID: userToken1.ID,
 	}
 	userToken2, err := testQueries.GetUserToken(context.Background(), arg)
 	require.NoError(t, err)
@@ -64,7 +64,7 @@ func TestDeleteUserToken(t *testing.T) {
 	require.NoError(t, err)
 
 	arg := GetUserTokenParams{
-		RefreshToken: userToken1.RefreshToken,
+		ID: userToken1.ID,
 	}
 	userToken2, err := testQueries.GetUserToken(context.Background(), arg)
 	require.Error(t, err)
@@ -85,7 +85,7 @@ func TestDeleteAllUserToken(t *testing.T) {
 	require.NoError(t, err)
 
 	arg := GetUserTokenParams{
-		RefreshToken: userToken1.RefreshToken,
+		ID: userToken1.ID,
 	}
 	userToken2, err := testQueries.GetUserToken(context.Background(), arg)
 	require.Error(t, err)
@@ -112,14 +112,14 @@ func TestDeleteExpiredTokens(t *testing.T) {
 	require.NoError(t, err)
 
 	getArg1 := GetUserTokenParams{
-		RefreshToken: expiredToken.RefreshToken,
+		ID: expiredToken.ID,
 	}
 	res1, err := testQueries.GetUserToken(context.Background(), getArg1)
 	require.ErrorIs(t, err, sql.ErrNoRows)
 	require.Empty(t, res1)
 
 	getArg2 := GetUserTokenParams{
-		RefreshToken: liveToken.RefreshToken,
+		ID: liveToken.ID,
 	}
 	res2, err := testQueries.GetUserToken(context.Background(), getArg2)
 	require.NoError(t, err)
