@@ -29,9 +29,9 @@ type UserToken struct {
 	ID           int64
 	UserID       int64
 	RefreshToken string
-	ExpiresAt    time.Time
-	CreatedAt    time.Time
 	UserAgent    string
 	ClientIp     string
 	IsBlocked    bool
+	ExpiresAt    time.Time
+	CreatedAt    time.Time
 }

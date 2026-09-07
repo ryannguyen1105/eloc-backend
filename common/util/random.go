@@ -133,3 +133,11 @@ func RandomDescription() string {
 	n := len(description)
 	return description[rand.Intn(n)]
 }
+
+func RandomUserAgent() string {
+	return RandomAlphabet(5)
+}
+
+func RandomClientIp() string {
+	return RandomNumberString(3) + "." + RandomNumberString(3) + "." + RandomNumberString(1) + "." + RandomNumberString(1)
+}

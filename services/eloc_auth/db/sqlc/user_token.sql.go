@@ -12,15 +12,14 @@ import (
 
 const createUserToken = `-- name: CreateUserToken :one
 INSERT INTO user_tokens (
-  id, user_id, refresh_token,user_agent,client_ip,is_blocked, expires_at
+  user_id, refresh_token,user_agent,client_ip,is_blocked, expires_at
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7
+  $1, $2, $3, $4, $5, $6
 )
-RETURNING id, user_id, refresh_token, expires_at, created_at, user_agent, client_ip, is_blocked
+RETURNING id, user_id, refresh_token, user_agent, client_ip, is_blocked, expires_at, created_at
 `
 
 type CreateUserTokenParams struct {
-	ID           int64
 	UserID       int64
 	RefreshToken string
 	UserAgent    string
@@ -31,7 +30,6 @@ type CreateUserTokenParams struct {
 
 func (q *Queries) CreateUserToken(ctx context.Context, arg CreateUserTokenParams) (UserToken, error) {
 	row := q.db.QueryRowContext(ctx, createUserToken,
-		arg.ID,
 		arg.UserID,
 		arg.RefreshToken,
 		arg.UserAgent,
@@ -44,11 +42,11 @@ func (q *Queries) CreateUserToken(ctx context.Context, arg CreateUserTokenParams
 		&i.ID,
 		&i.UserID,
 		&i.RefreshToken,
-		&i.ExpiresAt,
-		&i.CreatedAt,
 		&i.UserAgent,
 		&i.ClientIp,
 		&i.IsBlocked,
+		&i.ExpiresAt,
+		&i.CreatedAt,
 	)
 	return i, err
 }
@@ -92,7 +90,7 @@ func (q *Queries) DeleteUserToken(ctx context.Context, arg DeleteUserTokenParams
 }
 
 const getUserToken = `-- name: GetUserToken :one
-SELECT id, user_id, refresh_token, expires_at, created_at, user_agent, client_ip, is_blocked FROM user_tokens
+SELECT id, user_id, refresh_token, user_agent, client_ip, is_blocked, expires_at, created_at FROM user_tokens
 WHERE id = $1 LIMIT 1
 `
 
@@ -107,17 +105,17 @@ func (q *Queries) GetUserToken(ctx context.Context, arg GetUserTokenParams) (Use
 		&i.ID,
 		&i.UserID,
 		&i.RefreshToken,
-		&i.ExpiresAt,
-		&i.CreatedAt,
 		&i.UserAgent,
 		&i.ClientIp,
 		&i.IsBlocked,
+		&i.ExpiresAt,
+		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getUserTokenByRefreshToken = `-- name: GetUserTokenByRefreshToken :one
-SELECT id, user_id, refresh_token, expires_at, created_at, user_agent, client_ip, is_blocked FROM user_tokens
+SELECT id, user_id, refresh_token, user_agent, client_ip, is_blocked, expires_at, created_at FROM user_tokens
 WHERE refresh_token = $1 LIMIT 1
 `
 
@@ -132,11 +130,11 @@ func (q *Queries) GetUserTokenByRefreshToken(ctx context.Context, arg GetUserTok
 		&i.ID,
 		&i.UserID,
 		&i.RefreshToken,
-		&i.ExpiresAt,
-		&i.CreatedAt,
 		&i.UserAgent,
 		&i.ClientIp,
 		&i.IsBlocked,
+		&i.ExpiresAt,
+		&i.CreatedAt,
 	)
 	return i, err
 }
@@ -145,7 +143,7 @@ const revokeUserToken = `-- name: RevokeUserToken :one
 UPDATE user_tokens
 SET is_blocked = true
 WHERE id = $1
-RETURNING id, user_id, refresh_token, expires_at, created_at, user_agent, client_ip, is_blocked
+RETURNING id, user_id, refresh_token, user_agent, client_ip, is_blocked, expires_at, created_at
 `
 
 type RevokeUserTokenParams struct {
@@ -159,11 +157,11 @@ func (q *Queries) RevokeUserToken(ctx context.Context, arg RevokeUserTokenParams
 		&i.ID,
 		&i.UserID,
 		&i.RefreshToken,
-		&i.ExpiresAt,
-		&i.CreatedAt,
 		&i.UserAgent,
 		&i.ClientIp,
 		&i.IsBlocked,
+		&i.ExpiresAt,
+		&i.CreatedAt,
 	)
 	return i, err
 }

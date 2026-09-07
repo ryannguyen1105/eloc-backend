@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ryannguyen1105/eloc-backend/util"
+	"github.com/ryannguyen1105/eloc-backend/common/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -14,6 +14,9 @@ func createRandomUserToken(t *testing.T, user User) UserToken {
 	arg := CreateUserTokenParams{
 		UserID:       user.ID,
 		RefreshToken: util.RandomRefreshToken(),
+		UserAgent:    util.RandomUserAgent(),
+		ClientIp:     util.RandomClientIp(),
+		IsBlocked:    false,
 		ExpiresAt:    time.Now().UTC().Add(30 * time.Minute),
 	}
 	userToken, err := testQueries.CreateUserToken(context.Background(), arg)
@@ -23,6 +26,9 @@ func createRandomUserToken(t *testing.T, user User) UserToken {
 
 	require.Equal(t, arg.UserID, userToken.UserID)
 	require.Equal(t, arg.RefreshToken, userToken.RefreshToken)
+	require.Equal(t, arg.UserAgent, userToken.UserAgent)
+	require.Equal(t, arg.ClientIp, userToken.ClientIp)
+	require.Equal(t, arg.IsBlocked, userToken.IsBlocked)
 	require.WithinDuration(t, arg.ExpiresAt, userToken.ExpiresAt, time.Second)
 
 	return userToken
@@ -48,8 +54,54 @@ func TestGetUserToken(t *testing.T) {
 	require.NotEmpty(t, userToken2)
 
 	require.Equal(t, userToken1.ID, userToken2.ID)
+	require.Equal(t, userToken1.UserID, userToken2.UserID)
 	require.Equal(t, userToken1.RefreshToken, userToken2.RefreshToken)
+	require.Equal(t, userToken1.UserAgent, userToken2.UserAgent)
+	require.Equal(t, userToken1.ClientIp, userToken2.ClientIp)
+	require.Equal(t, userToken1.IsBlocked, userToken2.IsBlocked)
 	require.WithinDuration(t, userToken1.ExpiresAt, userToken2.ExpiresAt, time.Second)
+}
+
+func TestGetUserTokenByRefreshToken(t *testing.T) {
+	role := createRandomRole(t)
+	user := createRandomUser(t, role)
+
+	userToken1 := createRandomUserToken(t, user)
+	arg := GetUserTokenByRefreshTokenParams{
+		RefreshToken: userToken1.RefreshToken,
+	}
+	userToken2, err := testQueries.GetUserTokenByRefreshToken(context.Background(), arg)
+	require.NoError(t, err)
+	require.NotEmpty(t, userToken2)
+
+	require.Equal(t, userToken1.ID, userToken2.ID)
+	require.Equal(t, userToken1.UserID, userToken2.UserID)
+	require.Equal(t, userToken1.RefreshToken, userToken2.RefreshToken)
+	require.Equal(t, userToken1.UserAgent, userToken2.UserAgent)
+	require.Equal(t, userToken1.ClientIp, userToken2.ClientIp)
+	require.Equal(t, userToken1.IsBlocked, userToken2.IsBlocked)
+	require.WithinDuration(t, userToken1.ExpiresAt, userToken2.ExpiresAt, time.Second)
+
+}
+
+func TestRevokeUserToken(t *testing.T) {
+	role := createRandomRole(t)
+	user := createRandomUser(t, role)
+
+	userToken1 := createRandomUserToken(t, user)
+	revokeArg := RevokeUserTokenParams{
+		ID: userToken1.ID,
+	}
+	_, err := testQueries.RevokeUserToken(context.Background(), revokeArg)
+	require.NoError(t, err)
+
+	arg := GetUserTokenParams{
+		ID: userToken1.ID,
+	}
+	userToken2, err := testQueries.GetUserToken(context.Background(), arg)
+	require.NoError(t, err)
+	require.NotEmpty(t, userToken2)
+	require.True(t, userToken2.IsBlocked)
 }
 
 func TestDeleteUserToken(t *testing.T) {
