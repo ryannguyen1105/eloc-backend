@@ -1,40 +1,52 @@
-# Dien May Loc Backend
+# Dien May Loc - Microservices E-Commerce Backend
 
-A microservices-based backend system for a consumer electronics and home appliances e-commerce retail store, focusing on scalable system design.
+A microservices-based backend system for a consumer electronics and home appliances e-commerce retail store, focusing on scalable system design and modular architecture.
+
+---
 
 ## System Architecture
 
-The project utilizes a Database-per-Service pattern with 3 isolated PostgreSQL instances to ensure service independence:
+This project adopts the Database-per-Service pattern to maintain tight domain boundaries and service independence across 3 isolated PostgreSQL database instances:
 
-* Auth Service (auth): Handles user identity management and access tokens.
-* Product Service (product): Manages the consumer electronics catalog and inventory.
-* Order Service (order): Processes shopping carts and checkout lifecycles.
+- Auth Service (auth): Manages user identity, authentication, and token generation.
+- Product Service (product): Handles consumer electronics catalog, categories, and inventory.
+- Order Service (order): Manages shopping carts, checkout lifecycles, and transaction processing.
+
+---
 
 ## Tech Stack
 
-* Languages: Golang, SQL
-* Frameworks & Libraries: Gin Gonic, SQLC, Testify (Unit Testing)
-* Databases: PostgreSQL
-* API & Security: RESTful APIs, gRPC, Protocol Buffers, JWT, PASETO, Bcrypt
-* DevOps & Infrastructure: Docker, Git, Postman, GitHub Actions
+- Languages: Golang, SQL
+- Frameworks & Libraries: Gin Gonic, SQLC, Viper, Testify
+- Databases: PostgreSQL (Neon DB)
+- API & Security: RESTful APIs, gRPC, Protocol Buffers, JWT, PASETO, Bcrypt
+- DevOps & Infrastructure: Docker, GitHub Actions, Render, SSL, Git, Postman
+
+---
 
 ## Features Implemented
 
-### 1. Database Architecture & Transaction Management
-* Designed a Database-per-Service pattern with 3 isolated PostgreSQL instances (auth, product, order).
-* Implemented ACID transactions in auth and order services to ensure data consistency during concurrent writes.
+### 1. Microservices Architecture & Data Access
+- Applied Database-per-Service pattern with 3 PostgreSQL instances (auth, product, order).
+- Integrated SQLC for compile-time type-safe Go code generation, eliminating boilerplate and reflection overhead.
+- Implemented ACID transactions for concurrent write consistency during critical operations.
 
-### 2. Data Access Layer
-* Integrated SQLC to generate type-safe Go code from raw SQL, optimizing performance and eliminating boilerplate.
+### 2. REST APIs & Security
+- Built RESTful APIs using Gin framework with standardized JSON responses and centralized error handling middleware.
+- Secured endpoints using Bcrypt password hashing, JWT stateless authentication, and custom middleware for token validation.
 
-### 3. RESTful APIs
-* Implemented REST APIs using Gin Gonic with standardized JSON responses and error handling.
+### 3. Configuration & Containerization
+- Centralized environment management with Viper following 12-Factor App principles.
+- Optimized Docker image sizes using Multi-stage builds with Alpine Linux for lightweight deployment.
 
-### 4. DevOps & Testing
-* Containerized databases via Docker.
-* Built automated CI pipelines using GitHub Actions to run linters and testify unit tests on every Pull Request.
+### 4. CI/CD & Cloud Deployment
+- Automated linting and unit testing (testify/require) via GitHub Actions CI workflows.
+- Deployed Go microservices to Render connected to Neon PostgreSQL over SSL.
+
+---
 
 ## Upcoming Roadmap
 
-* Production Readiness: Completing the remaining e-commerce core services and business logic to prepare the entire application for production.
-* Cloud Deployment: Designing containerized deployment workflows to migrate the microservices infrastructure onto a cloud platform.
+- Inter-Service Communication & Caching: Implementing gRPC/Protobuf protocols for internal service calls and integrating Redis for high-performance caching.
+- Data Layer & Access Control: Migrating database drivers to pgx for enhanced PostgreSQL performance and implementing RBAC (Role-Based Access Control).
+- Security & Observability: Configuring CORS middleware for secure cross-origin requests and setting up API Gateway with centralized observability.
