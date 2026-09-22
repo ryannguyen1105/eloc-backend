@@ -1,0 +1,25 @@
+info:
+  name: createUser
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: https://eloc-auth.onrender.com/users
+  body:
+    type: json
+    data: |-
+      {
+        "email" : "tainguyen123@gmail.com",
+        "password" : "123456",
+        "full_name" : "Nguyen Thanh Tai",
+        "Role" : "ADMIN"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

@@ -1,0 +1,7 @@
+info:
+  name: eloc_order
+  type: folder
+  seq: 3
+
+request:
+  auth: inherit

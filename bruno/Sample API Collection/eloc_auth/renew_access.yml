@@ -1,0 +1,22 @@
+info:
+  name: renew_access
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: https://eloc-auth.onrender.com/users/token/renew_access
+  body:
+    type: json
+    data: |-
+      {
+        "refresh_token" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImRjZjQwNWZlLWM2NTgtNDEwYS1hYTc0LWE5OTYyMmE0ZWQxZSIsInVzZXJfaWQiOjEsImVtYWlsIjoidGFpbmd1eWVuMTIzQGdtYWlsLmNvbSIsInJvbGUiOiJBRE1JTiIsImlzX3ZlcmlmaWVkIjpmYWxzZSwiaXNzdWVkX2F0IjoiMjAyNi0wOS0wOVQxMjowNzoxOC41Njk5MzcwNjlaIiwiZXhwaXJlZF9hdCI6IjIwMjYtMDktMTZUMTI6MDc6MTguNTY5OTM3MTU5WiJ9.fDyMCC6nhu0J-QQR1tiPijGjLpBUCGz-o5bTWmFQW2U"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

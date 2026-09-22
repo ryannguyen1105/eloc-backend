@@ -1,0 +1,24 @@
+info:
+  name: cart
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: https://eloc-order.onrender.com/cart
+  body:
+    type: json
+    data: |-
+      {
+        "user_id" : 2,
+        "product_id" : 2,
+        "quantity" : 5
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
