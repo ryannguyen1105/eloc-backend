@@ -14,6 +14,7 @@ import (
 )
 
 type productResponse struct {
+	ID        int64     `json:"id"`
 	Name      string    `json:"name"`
 	Slug      string    `json:"slug"`
 	Sku       string    `json:"sku"`
@@ -24,6 +25,7 @@ type productResponse struct {
 
 func newProductResponse(product db.Product) productResponse {
 	return productResponse{
+		ID:        product.ID,
 		Name:      product.Name,
 		Slug:      product.Slug,
 		Sku:       product.Sku,
@@ -68,12 +70,12 @@ func (server *Server) createProduct(ctx *gin.Context) {
 }
 
 type getProductRequest struct {
-	ID int64 `json:"id" binding:"required,min=1"`
+	ID int64 `uri:"id" binding:"required,min=1"`
 }
 
 func (server *Server) getProduct(ctx *gin.Context) {
 	var req getProductRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	if err := ctx.ShouldBindUri(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
@@ -83,7 +85,7 @@ func (server *Server) getProduct(ctx *gin.Context) {
 	product, err := server.productService.GetProduct(ctx, dto)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
@@ -91,6 +93,29 @@ func (server *Server) getProduct(ctx *gin.Context) {
 	}
 	rsp := newProductResponse(product)
 	ctx.JSON(http.StatusOK, rsp)
+}
+
+type ListProductsRequest struct {
+	PageID   int32 `form:"page_id" binding:"required,min=1"`
+	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
+}
+
+func (server *Server) ListProduct(ctx *gin.Context) {
+	var req ListProductsRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+	dto := service.ListProductsDTO{
+		Limit:  req.PageSize,
+		Offset: (req.PageID - 1) * req.PageSize,
+	}
+	products, err := server.productService.ListProducts(ctx, dto)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, products)
 }
 
 type updateProductResponse struct {
@@ -115,7 +140,6 @@ func newUpdateProductResponse(product db.Product) updateProductResponse {
 
 type updateProductRequest struct {
 	CategoryID int64  `json:"category_id" binding:"required,min=1"`
-	ID         int64  `json:"id" binding:"required,min=1"`
 	Name       string `json:"name" binding:"required"`
 	Slug       string `json:"slug" binding:"required"`
 	Sku        string `json:"sku" binding:"required"`
@@ -123,7 +147,17 @@ type updateProductRequest struct {
 	Stock      int32  `json:"stock" binding:"required,min=1"`
 }
 
+type updateProductGetIDRequest struct {
+	ID int64 `uri:"id" binding:"required,min=1"`
+}
+
 func (server *Server) updateProduct(ctx *gin.Context) {
+	var URIreq updateProductGetIDRequest
+	if err := ctx.ShouldBindUri(&URIreq); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
 	var req updateProductRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
@@ -131,7 +165,7 @@ func (server *Server) updateProduct(ctx *gin.Context) {
 	}
 	dto := service.UpdateProductDTO{
 		CategoryID: req.CategoryID,
-		ID:         req.ID,
+		ID: URIreq.ID,
 		Name:       req.Name,
 		Slug:       req.Slug,
 		Sku:        req.Sku,
@@ -141,7 +175,7 @@ func (server *Server) updateProduct(ctx *gin.Context) {
 	product, err := server.productService.UpdateProduct(ctx, dto)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))

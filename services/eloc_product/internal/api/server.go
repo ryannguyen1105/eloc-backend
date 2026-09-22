@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/ryannguyen1105/eloc-backend/common/middleware"
 	db "github.com/ryannguyen1105/eloc-backend/services/eloc_product/db/sqlc"
 	"github.com/ryannguyen1105/eloc-backend/services/eloc_product/internal/service"
 )
@@ -13,8 +14,10 @@ type Server struct {
 }
 
 func NewServer(store db.Store) (*Server, error) {
-	productService := service.NewProductService(store)
 	router := gin.Default()
+	productService := service.NewProductService(store)
+
+	router.Use(middleware.CORSMiddleware())
 
 	server := &Server{
 		store:          store,
@@ -32,11 +35,17 @@ func (server *Server) setupRouter() {
 		categoryRouters.GET("",server.getCategory)
 		categoryRouters.DELETE("/delete", server.deleteCategory)
 	}
+
+	productsRouters := server.router.Group("/products")
+	{
+		productsRouters.GET("", server.ListProduct)
+	}
+
 	productRouters := server.router.Group("/product")
 	{
 		productRouters.POST("", server.createProduct)
-		productRouters.GET("", server.getProduct)
-		productRouters.PUT("/update", server.updateProduct)
+		productRouters.GET("/:id", server.getProduct)
+		productRouters.PUT("/update/:id", server.updateProduct)
 		productRouters.PATCH("/updatestock",server.updateProductStock )
 		productRouters.DELETE("/delete", server.deleteProduct)
 	}

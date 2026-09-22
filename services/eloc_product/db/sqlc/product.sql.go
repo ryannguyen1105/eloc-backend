@@ -170,8 +170,7 @@ func (q *Queries) GetProductBySlug(ctx context.Context, arg GetProductBySlugPara
 }
 
 const listProducts = `-- name: ListProducts :many
-SELECT id, category_id, name, slug, sku, price, stock, created_at
-FROM products
+SELECT id, category_id, name, slug, sku, price, stock, attributes, created_at, updated_at FROM products
 ORDER BY created_at DESC
 LIMIT $1 OFFSET $2
 `
@@ -181,26 +180,15 @@ type ListProductsParams struct {
 	Offset int32
 }
 
-type ListProductsRow struct {
-	ID         int64
-	CategoryID int64
-	Name       string
-	Slug       string
-	Sku        string
-	Price      int64
-	Stock      int32
-	CreatedAt  time.Time
-}
-
-func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]ListProductsRow, error) {
+func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]Product, error) {
 	rows, err := q.db.QueryContext(ctx, listProducts, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListProductsRow
+	var items []Product
 	for rows.Next() {
-		var i ListProductsRow
+		var i Product
 		if err := rows.Scan(
 			&i.ID,
 			&i.CategoryID,
@@ -209,7 +197,9 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]L
 			&i.Sku,
 			&i.Price,
 			&i.Stock,
+			&i.Attributes,
 			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}

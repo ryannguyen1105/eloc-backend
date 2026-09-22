@@ -22,8 +22,7 @@ FROM products
 WHERE name = $1 LIMIT 1;
 
 -- name: ListProducts :many
-SELECT id, category_id, name, slug, sku, price, stock, created_at
-FROM products
+SELECT * FROM products
 ORDER BY created_at DESC
 LIMIT $1 OFFSET $2;
 

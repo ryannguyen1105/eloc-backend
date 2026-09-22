@@ -20,17 +20,21 @@ type Server struct {
 }
 
 func NewServer(config config.Config, store db.Store) (*Server, error) {
+	router := gin.Default()
 	tokenMaker, err := token.NewJWTMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
 	}
 	authService := service.NewAuthService(store, tokenMaker, config)
 
+	router.Use(middleware.CORSMiddleware())
+
 	server := &Server{
 		config:      config,
 		store:       store,
 		tokenMaker:  tokenMaker,
 		authService: authService,
+		router:      router,
 	}
 	server.setupRouter()
 
@@ -38,22 +42,19 @@ func NewServer(config config.Config, store db.Store) (*Server, error) {
 }
 
 func (server *Server) setupRouter() {
-	router := gin.Default()
 
-	userRouters := router.Group("users")
+	userRouters := server.router.Group("users")
 	{
 		userRouters.POST("", server.createUser)
 		userRouters.POST("/login", server.loginUser)
 		userRouters.POST("/token/renew_access", server.renewAccessToken)
 	}
-	authRouters := router.Group("/users").Use(middleware.AuthMiddleware(server.tokenMaker))
+	authRouters := server.router.Group("/users").Use(middleware.AuthMiddleware(server.tokenMaker))
 	{
 		authRouters.PATCH("/updateFullName", server.updateUserFullName)
 		authRouters.PATCH("/updatePassword", server.updateUserPassword)
-		
-	}
 
-	server.router = router
+	}
 }
 
 func (server *Server) Start(address string) error {

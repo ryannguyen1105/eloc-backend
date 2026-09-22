@@ -53,6 +53,18 @@ func (productService *ProductService) GetProduct(ctx context.Context, dto GetPro
 	return productService.store.GetProductByID(ctx, arg)
 }
 
+type ListProductsDTO struct {
+	Limit int32
+	Offset int32
+}
+
+func (productService *ProductService) ListProducts(ctx context.Context, dto ListProductsDTO) ([]db.Product, error) {
+	arg := db.ListProductsParams{
+		Limit: dto.Limit,
+		Offset: dto.Offset,
+	}
+	return productService.store.ListProducts(ctx, arg)
+}
 type UpdateProductDTO struct {
 	CategoryID int64
 	ID         int64
