@@ -115,7 +115,11 @@ func (server *Server) ListProduct(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-	ctx.JSON(http.StatusOK, products)
+	var rsp []productResponse
+	for _, p := range products {
+		rsp = append(rsp, newProductResponse(p))
+	}
+	ctx.JSON(http.StatusOK, rsp)
 }
 
 type updateProductResponse struct {
