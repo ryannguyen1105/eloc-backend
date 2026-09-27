@@ -9,13 +9,15 @@ import (
 )
 
 type CreateProductDTO struct {
-	CategoryID int64
-	Name       string
-	Slug       string
-	Sku        string
-	Price      int64
-	Stock      int32
-	Attributes pqtype.NullRawMessage
+	CategoryID  int64
+	Name        string
+	Slug        string
+	Sku         string
+	Price       int64
+	Stock       int32
+	Description string
+	Status      string
+	Attributes  pqtype.NullRawMessage
 }
 
 func (productService *ProductService) CreateProduct(ctx context.Context, dto CreateProductDTO) (db.Product, error) {
@@ -28,12 +30,14 @@ func (productService *ProductService) CreateProduct(ctx context.Context, dto Cre
 	}
 
 	arg := db.CreateProductParams{
-		CategoryID: category.ID,
-		Name:       dto.Name,
-		Slug:       dto.Slug,
-		Sku:        dto.Sku,
-		Price:      dto.Price,
-		Stock:      dto.Stock,
+		CategoryID:  category.ID,
+		Name:        dto.Name,
+		Slug:        dto.Slug,
+		Sku:         dto.Sku,
+		Price:       dto.Price,
+		Stock:       dto.Stock,
+		Description: dto.Description,
+		Status:      "active",
 		Attributes: pqtype.NullRawMessage{
 			RawMessage: json.RawMessage([]byte("null")),
 			Valid:      false,
@@ -54,36 +58,41 @@ func (productService *ProductService) GetProduct(ctx context.Context, dto GetPro
 }
 
 type ListProductsDTO struct {
-	Limit int32
+	Limit  int32
 	Offset int32
 }
 
 func (productService *ProductService) ListProducts(ctx context.Context, dto ListProductsDTO) ([]db.Product, error) {
 	arg := db.ListProductsParams{
-		Limit: dto.Limit,
+		Limit:  dto.Limit,
 		Offset: dto.Offset,
 	}
 	return productService.store.ListProducts(ctx, arg)
 }
+
 type UpdateProductDTO struct {
-	CategoryID int64
-	ID         int64
-	Name       string
-	Slug       string
-	Sku        string
-	Price      int64
-	Stock      int32
+	CategoryID  int64
+	ID          int64
+	Name        string
+	Slug        string
+	Sku         string
+	Price       int64
+	Stock       int32
+	Description string
+	Status      string
 }
 
 func (productService *ProductService) UpdateProduct(ctx context.Context, dto UpdateProductDTO) (db.Product, error) {
 	arg := db.UpdateProductParams{
-		CategoryID: dto.CategoryID,
-		ID:         dto.ID,
-		Name:       dto.Name,
-		Slug:       dto.Slug,
-		Sku:        dto.Sku,
-		Price:      dto.Price,
-		Stock:      dto.Stock,
+		CategoryID:  dto.CategoryID,
+		ID:          dto.ID,
+		Name:        dto.Name,
+		Slug:        dto.Slug,
+		Sku:         dto.Sku,
+		Price:       dto.Price,
+		Stock:       dto.Stock,
+		Description: dto.Description,
+		Status:      dto.Status,
 	}
 	return productService.store.UpdateProduct(ctx, arg)
 }

@@ -12,6 +12,8 @@ CREATE TABLE "products" (
   "sku" varchar UNIQUE NOT NULL,
   "price" bigint NOT NULL,
   "stock" int NOT NULL DEFAULT 0,
+  "description" varchar NOT NULL,
+  "status" varchar NOT NULL DEFAULT 'active',
   "attributes" jsonb,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
   "updated_at" timestamptz NOT NULL DEFAULT (now())

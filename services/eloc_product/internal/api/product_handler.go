@@ -14,33 +14,38 @@ import (
 )
 
 type productResponse struct {
-	ID        int64     `json:"id"`
-	Name      string    `json:"name"`
-	Slug      string    `json:"slug"`
-	Sku       string    `json:"sku"`
-	Price     int64     `json:"price"`
-	Stock     int32     `json:"stock"`
-	CreatedAt time.Time `json:"created_at"`
+	ID          int64          `json:"id"`
+	Name        string         `json:"name"`
+	Slug        string         `json:"slug"`
+	Sku         string         `json:"sku"`
+	Price       int64          `json:"price"`
+	Stock       int32          `json:"stock"`
+	Description string `json:"description"`
+	Status      string         `json:"status"`
+	CreatedAt   time.Time      `json:"created_at"`
 }
 
 func newProductResponse(product db.Product) productResponse {
 	return productResponse{
-		ID:        product.ID,
-		Name:      product.Name,
-		Slug:      product.Slug,
-		Sku:       product.Sku,
-		Price:     product.Price,
-		Stock:     product.Stock,
-		CreatedAt: product.CreatedAt,
+		ID:          product.ID,
+		Name:        product.Name,
+		Slug:        product.Slug,
+		Sku:         product.Sku,
+		Price:       product.Price,
+		Stock:       product.Stock,
+		Description: product.Description,
+		Status:      product.Status,
+		CreatedAt:   product.CreatedAt,
 	}
 }
 
 type createProductRequest struct {
-	Name  string `json:"name" binding:"required"`
-	Slug  string `json:"slug" binding:"required"`
-	Sku   string `json:"sku" binding:"required"`
-	Price int64  `json:"price" binding:"required,min=1"`
-	Stock int32  `json:"stock" binding:"required,min=1"`
+	Name        string         `json:"name" binding:"required"`
+	Slug        string         `json:"slug" binding:"required"`
+	Sku         string         `json:"sku" binding:"required"`
+	Price       int64          `json:"price" binding:"required,min=1"`
+	Stock       int32          `json:"stock" binding:"required,min=1"`
+	Description string `json:"description" binding:"required"`
 }
 
 func (server *Server) createProduct(ctx *gin.Context) {
@@ -50,11 +55,12 @@ func (server *Server) createProduct(ctx *gin.Context) {
 		return
 	}
 	dto := service.CreateProductDTO{
-		Name:  req.Name,
-		Slug:  req.Slug,
-		Sku:   req.Sku,
-		Price: req.Price,
-		Stock: req.Stock,
+		Name:        req.Name,
+		Slug:        req.Slug,
+		Sku:         req.Sku,
+		Price:       req.Price,
+		Stock:       req.Stock,
+		Description: req.Description,
 		Attributes: pqtype.NullRawMessage{
 			RawMessage: json.RawMessage([]byte("null")),
 			Valid:      false,
@@ -123,32 +129,38 @@ func (server *Server) ListProduct(ctx *gin.Context) {
 }
 
 type updateProductResponse struct {
-	Name      string    `json:"name"`
-	Slug      string    `json:"slug"`
-	Sku       string    `json:"sku"`
-	Price     int64     `json:"price"`
-	Stock     int32     `json:"stock"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Name        string         `json:"name"`
+	Slug        string         `json:"slug"`
+	Sku         string         `json:"sku"`
+	Price       int64          `json:"price"`
+	Stock       int32          `json:"stock"`
+	Description string `json:"description"`
+	Status      string         `json:"status"`
+	UpdatedAt   time.Time      `json:"updated_at"`
 }
 
 func newUpdateProductResponse(product db.Product) updateProductResponse {
 	return updateProductResponse{
-		Name:      product.Name,
-		Slug:      product.Slug,
-		Sku:       product.Sku,
-		Price:     product.Price,
-		Stock:     product.Stock,
-		UpdatedAt: product.UpdatedAt,
+		Name:        product.Name,
+		Slug:        product.Slug,
+		Sku:         product.Sku,
+		Price:       product.Price,
+		Stock:       product.Stock,
+		Description: product.Description,
+		Status:      product.Status,
+		UpdatedAt:   product.UpdatedAt,
 	}
 }
 
 type updateProductRequest struct {
-	CategoryID int64  `json:"category_id" binding:"required,min=1"`
-	Name       string `json:"name" binding:"required"`
-	Slug       string `json:"slug" binding:"required"`
-	Sku        string `json:"sku" binding:"required"`
-	Price      int64  `json:"price" binding:"required,min=1"`
-	Stock      int32  `json:"stock" binding:"required,min=1"`
+	CategoryID  int64          `json:"category_id" binding:"required,min=1"`
+	Name        string         `json:"name" binding:"required"`
+	Slug        string         `json:"slug" binding:"required"`
+	Sku         string         `json:"sku" binding:"required"`
+	Price       int64          `json:"price" binding:"required,min=1"`
+	Stock       int32          `json:"stock" binding:"required,min=1"`
+	Description string `json:"description" binding:"required"`
+	Status      string         `json:"status" binding:"required"`
 }
 
 type updateProductGetIDRequest struct {
@@ -168,13 +180,15 @@ func (server *Server) updateProduct(ctx *gin.Context) {
 		return
 	}
 	dto := service.UpdateProductDTO{
-		CategoryID: req.CategoryID,
-		ID: URIreq.ID,
-		Name:       req.Name,
-		Slug:       req.Slug,
-		Sku:        req.Sku,
-		Price:      req.Price,
-		Stock:      req.Stock,
+		CategoryID:  req.CategoryID,
+		ID:          URIreq.ID,
+		Name:        req.Name,
+		Slug:        req.Slug,
+		Sku:         req.Sku,
+		Price:       req.Price,
+		Stock:       req.Stock,
+		Description: req.Description,
+		Status:      req.Status,
 	}
 	product, err := server.productService.UpdateProduct(ctx, dto)
 	if err != nil {

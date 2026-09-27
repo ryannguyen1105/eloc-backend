@@ -14,21 +14,23 @@ import (
 
 const createProduct = `-- name: CreateProduct :one
 INSERT INTO products (
-    category_id, name, slug, sku, price, stock, attributes
+    category_id, name, slug, sku, price, stock, description, status, attributes
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7
+    $1, $2, $3, $4, $5, $6, $7, $8, $9
 )
-RETURNING id, category_id, name, slug, sku, price, stock, attributes, created_at, updated_at
+RETURNING id, category_id, name, slug, sku, price, stock, description, status, attributes, created_at, updated_at
 `
 
 type CreateProductParams struct {
-	CategoryID int64
-	Name       string
-	Slug       string
-	Sku        string
-	Price      int64
-	Stock      int32
-	Attributes pqtype.NullRawMessage
+	CategoryID  int64
+	Name        string
+	Slug        string
+	Sku         string
+	Price       int64
+	Stock       int32
+	Description string
+	Status      string
+	Attributes  pqtype.NullRawMessage
 }
 
 func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error) {
@@ -39,6 +41,8 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 		arg.Sku,
 		arg.Price,
 		arg.Stock,
+		arg.Description,
+		arg.Status,
 		arg.Attributes,
 	)
 	var i Product
@@ -50,6 +54,8 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 		&i.Sku,
 		&i.Price,
 		&i.Stock,
+		&i.Description,
+		&i.Status,
 		&i.Attributes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -60,7 +66,7 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 const deleteProduct = `-- name: DeleteProduct :one
 DELETE FROM products
 WHERE id = $1
-RETURNING id, category_id, name, slug, sku, price, stock, attributes, created_at, updated_at
+RETURNING id, category_id, name, slug, sku, price, stock, description, status, attributes, created_at, updated_at
 `
 
 type DeleteProductParams struct {
@@ -78,6 +84,8 @@ func (q *Queries) DeleteProduct(ctx context.Context, arg DeleteProductParams) (P
 		&i.Sku,
 		&i.Price,
 		&i.Stock,
+		&i.Description,
+		&i.Status,
 		&i.Attributes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -86,7 +94,7 @@ func (q *Queries) DeleteProduct(ctx context.Context, arg DeleteProductParams) (P
 }
 
 const getProductByID = `-- name: GetProductByID :one
-SELECT id, category_id, name, slug, sku, price, stock, attributes, created_at, updated_at
+SELECT id, category_id, name, slug, sku, price, stock, description, status, attributes, created_at, updated_at
 FROM products
 WHERE id = $1 LIMIT 1
 `
@@ -106,6 +114,8 @@ func (q *Queries) GetProductByID(ctx context.Context, arg GetProductByIDParams) 
 		&i.Sku,
 		&i.Price,
 		&i.Stock,
+		&i.Description,
+		&i.Status,
 		&i.Attributes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -114,7 +124,7 @@ func (q *Queries) GetProductByID(ctx context.Context, arg GetProductByIDParams) 
 }
 
 const getProductByName = `-- name: GetProductByName :one
-SELECT id, category_id, name, slug, sku, price, stock, attributes, created_at, updated_at
+SELECT id, category_id, name, slug, sku, price, stock, description, status, attributes, created_at, updated_at
 FROM products
 WHERE name = $1 LIMIT 1
 `
@@ -134,6 +144,8 @@ func (q *Queries) GetProductByName(ctx context.Context, arg GetProductByNamePara
 		&i.Sku,
 		&i.Price,
 		&i.Stock,
+		&i.Description,
+		&i.Status,
 		&i.Attributes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -142,7 +154,7 @@ func (q *Queries) GetProductByName(ctx context.Context, arg GetProductByNamePara
 }
 
 const getProductBySlug = `-- name: GetProductBySlug :one
-SELECT id, category_id, name, slug, sku, price, stock, attributes, created_at, updated_at
+SELECT id, category_id, name, slug, sku, price, stock, description, status, attributes, created_at, updated_at
 FROM products
 WHERE slug = $1 LIMIT 1
 `
@@ -162,6 +174,8 @@ func (q *Queries) GetProductBySlug(ctx context.Context, arg GetProductBySlugPara
 		&i.Sku,
 		&i.Price,
 		&i.Stock,
+		&i.Description,
+		&i.Status,
 		&i.Attributes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -170,7 +184,7 @@ func (q *Queries) GetProductBySlug(ctx context.Context, arg GetProductBySlugPara
 }
 
 const listProducts = `-- name: ListProducts :many
-SELECT id, category_id, name, slug, sku, price, stock, attributes, created_at, updated_at FROM products
+SELECT id, category_id, name, slug, sku, price, stock, description, status, attributes, created_at, updated_at FROM products
 ORDER BY created_at DESC
 LIMIT $1 OFFSET $2
 `
@@ -197,6 +211,8 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]P
 			&i.Sku,
 			&i.Price,
 			&i.Stock,
+			&i.Description,
+			&i.Status,
 			&i.Attributes,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -215,7 +231,7 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]P
 }
 
 const listProductsByCategory = `-- name: ListProductsByCategory :many
-SELECT id, category_id, name, slug, sku, price, stock, created_at
+SELECT id, category_id, name, slug, sku, price, stock, description, status, created_at
 FROM products
 WHERE category_id = $1
 ORDER BY created_at DESC
@@ -229,14 +245,16 @@ type ListProductsByCategoryParams struct {
 }
 
 type ListProductsByCategoryRow struct {
-	ID         int64
-	CategoryID int64
-	Name       string
-	Slug       string
-	Sku        string
-	Price      int64
-	Stock      int32
-	CreatedAt  time.Time
+	ID          int64
+	CategoryID  int64
+	Name        string
+	Slug        string
+	Sku         string
+	Price       int64
+	Stock       int32
+	Description string
+	Status      string
+	CreatedAt   time.Time
 }
 
 func (q *Queries) ListProductsByCategory(ctx context.Context, arg ListProductsByCategoryParams) ([]ListProductsByCategoryRow, error) {
@@ -256,6 +274,8 @@ func (q *Queries) ListProductsByCategory(ctx context.Context, arg ListProductsBy
 			&i.Sku,
 			&i.Price,
 			&i.Stock,
+			&i.Description,
+			&i.Status,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -280,21 +300,25 @@ SET
     sku = $5,
     price = $6,
     stock = $7,
-    attributes = $8,
+    description = $8,
+    status = $9,
+    attributes = $10,
     updated_at = now()
 WHERE id = $1
-RETURNING id, category_id, name, slug, sku, price, stock, attributes, created_at, updated_at
+RETURNING id, category_id, name, slug, sku, price, stock, description, status, attributes, created_at, updated_at
 `
 
 type UpdateProductParams struct {
-	ID         int64
-	CategoryID int64
-	Name       string
-	Slug       string
-	Sku        string
-	Price      int64
-	Stock      int32
-	Attributes pqtype.NullRawMessage
+	ID          int64
+	CategoryID  int64
+	Name        string
+	Slug        string
+	Sku         string
+	Price       int64
+	Stock       int32
+	Description string
+	Status      string
+	Attributes  pqtype.NullRawMessage
 }
 
 func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) (Product, error) {
@@ -306,6 +330,8 @@ func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) (P
 		arg.Sku,
 		arg.Price,
 		arg.Stock,
+		arg.Description,
+		arg.Status,
 		arg.Attributes,
 	)
 	var i Product
@@ -317,6 +343,8 @@ func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) (P
 		&i.Sku,
 		&i.Price,
 		&i.Stock,
+		&i.Description,
+		&i.Status,
 		&i.Attributes,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -330,7 +358,7 @@ SET
     stock = stock + $2,
     updated_at = now()
 WHERE id = $1
-RETURNING id, category_id, name, slug, sku, price, stock, attributes, created_at, updated_at
+RETURNING id, category_id, name, slug, sku, price, stock, description, status, attributes, created_at, updated_at
 `
 
 type UpdateProductStockParams struct {
@@ -349,6 +377,8 @@ func (q *Queries) UpdateProductStock(ctx context.Context, arg UpdateProductStock
 		&i.Sku,
 		&i.Price,
 		&i.Stock,
+		&i.Description,
+		&i.Status,
 		&i.Attributes,
 		&i.CreatedAt,
 		&i.UpdatedAt,

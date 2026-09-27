@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/ryannguyen1105/eloc-backend/util"
+	"github.com/ryannguyen1105/eloc-backend/common/util"
 	"github.com/sqlc-dev/pqtype"
 	"github.com/stretchr/testify/require"
 )
@@ -18,7 +18,9 @@ func createRandomProduct(t *testing.T, category Category) Product {
 		Slug:       productSlug,
 		Sku:        util.RandomSku(),
 		Price:      util.RandomPrice(),
-		Stock:      0,
+		Description: util.RandomDescriptionForProduct(),
+		Status: "active",
+		Stock:  0,
 		Attributes: pqtype.NullRawMessage{
 			RawMessage: []byte("null"),
 			Valid:      false,
@@ -33,6 +35,8 @@ func createRandomProduct(t *testing.T, category Category) Product {
 	require.Equal(t, arg.Slug, product.Slug)
 	require.Equal(t, arg.Sku, product.Sku)
 	require.Equal(t, arg.Price, product.Price)
+	require.Equal(t, arg.Description, product.Description)
+	require.Equal(t, arg.Status, product.Status)
 	require.Equal(t, arg.Stock, product.Stock)
 	require.Equal(t, arg.Attributes.Valid, product.Attributes.Valid)
 
@@ -64,6 +68,8 @@ func TestGetProduct(t *testing.T) {
 	require.Equal(t, product1.Sku, product2.Sku)
 	require.Equal(t, product1.Price, product2.Price)
 	require.Equal(t, product1.Stock, product2.Stock)
+	require.Equal(t, product1.Description, product2.Description)
+	require.Equal(t, product1.Status, product2.Status)
 	require.Equal(t, product1.Attributes.Valid, product2.Attributes.Valid)
 }
 
@@ -85,6 +91,8 @@ func TestGetProductBySlug(t *testing.T) {
 	require.Equal(t, product1.Sku, product2.Sku)
 	require.Equal(t, product1.Price, product2.Price)
 	require.Equal(t, product1.Stock, product2.Stock)
+	require.Equal(t, product1.Description, product2.Description)
+	require.Equal(t, product1.Status, product2.Status)
 	require.Equal(t, product1.Attributes.Valid, product2.Attributes.Valid)
 }
 
@@ -92,14 +100,16 @@ func TestUpdateProduct(t *testing.T) {
 	category := createRandomCategory(t)
 	product1 := createRandomProduct(t, category)
 	arg := UpdateProductParams{
-		ID:         product1.ID,
-		CategoryID: product1.CategoryID,
-		Name:       product1.Name + " ",
-		Slug:       product1.Slug,
-		Sku:        product1.Sku,
-		Price:      product1.Price,
-		Stock:      product1.Stock,
-		Attributes: product1.Attributes,
+		ID:          product1.ID,
+		CategoryID:  product1.CategoryID,
+		Name:        product1.Name + " ",
+		Slug:        product1.Slug,
+		Sku:         product1.Sku,
+		Price:       product1.Price,
+		Stock:       product1.Stock,
+		Description: product1.Description,
+		Status:      product1.Status,
+		Attributes:  product1.Attributes,
 	}
 	product2, err := testQueries.UpdateProduct(context.Background(), arg)
 	require.NoError(t, err)
@@ -112,6 +122,8 @@ func TestUpdateProduct(t *testing.T) {
 	require.Equal(t, arg.Sku, product2.Sku)
 	require.Equal(t, arg.Price, product2.Price)
 	require.Equal(t, arg.Stock, product2.Stock)
+	require.Equal(t, product1.Description, product2.Description)
+	require.Equal(t, product1.Status, product2.Status)
 	require.Equal(t, arg.Attributes.Valid, product2.Attributes.Valid)
 }
 

@@ -141,3 +141,8 @@ func RandomUserAgent() string {
 func RandomClientIp() string {
 	return RandomNumberString(3) + "." + RandomNumberString(3) + "." + RandomNumberString(1) + "." + RandomNumberString(1)
 }
+
+func RandomDescriptionForProduct() string {
+	descriptonForProduct := "Electronics is a premier retail and repair shop located in the heart of the city. We specialize in high-quality tech products, including smartphones, laptops, home entertainment systems, and essential mobile accessories. By combining competitive pricing, expert staff advice, and dependable after-sales repair services, we aim to be the local community's trusted destination for all modern technology needs."
+	return descriptonForProduct
+}

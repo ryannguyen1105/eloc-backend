@@ -25,7 +25,10 @@ profile.cov
 # go.work.sum
 
 # env file
-.env
+services/eloc_auth/app.env
+services/eloc_product/app.env
+services/eloc_order/app.env
+
 
 # Editor/IDE
 .idea/

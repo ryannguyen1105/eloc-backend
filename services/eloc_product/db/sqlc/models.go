@@ -17,16 +17,18 @@ type Category struct {
 }
 
 type Product struct {
-	ID         int64
-	CategoryID int64
-	Name       string
-	Slug       string
-	Sku        string
-	Price      int64
-	Stock      int32
-	Attributes pqtype.NullRawMessage
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
+	ID          int64
+	CategoryID  int64
+	Name        string
+	Slug        string
+	Sku         string
+	Price       int64
+	Stock       int32
+	Description string
+	Status      string
+	Attributes  pqtype.NullRawMessage
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 type ProductImage struct {

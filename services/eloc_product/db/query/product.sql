@@ -1,23 +1,23 @@
 -- name: CreateProduct :one
 INSERT INTO products (
-    category_id, name, slug, sku, price, stock, attributes
+    category_id, name, slug, sku, price, stock, description, status, attributes
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7
+    $1, $2, $3, $4, $5, $6, $7, $8, $9
 )
-RETURNING id, category_id, name, slug, sku, price, stock, attributes, created_at, updated_at;
+RETURNING id, category_id, name, slug, sku, price, stock, description, status, attributes, created_at, updated_at;
 
 -- name: GetProductByID :one
-SELECT id, category_id, name, slug, sku, price, stock, attributes, created_at, updated_at
+SELECT id, category_id, name, slug, sku, price, stock, description, status, attributes, created_at, updated_at
 FROM products
 WHERE id = $1 LIMIT 1;
 
 -- name: GetProductBySlug :one
-SELECT id, category_id, name, slug, sku, price, stock, attributes, created_at, updated_at
+SELECT id, category_id, name, slug, sku, price, stock, description, status, attributes, created_at, updated_at
 FROM products
 WHERE slug = $1 LIMIT 1;
 
 -- name: GetProductByName :one
-SELECT id, category_id, name, slug, sku, price, stock, attributes, created_at, updated_at
+SELECT id, category_id, name, slug, sku, price, stock, description, status, attributes, created_at, updated_at
 FROM products
 WHERE name = $1 LIMIT 1;
 
@@ -27,7 +27,7 @@ ORDER BY created_at DESC
 LIMIT $1 OFFSET $2;
 
 -- name: ListProductsByCategory :many
-SELECT id, category_id, name, slug, sku, price, stock, created_at
+SELECT id, category_id, name, slug, sku, price, stock, description, status, created_at
 FROM products
 WHERE category_id = $1
 ORDER BY created_at DESC
@@ -42,7 +42,9 @@ SET
     sku = $5,
     price = $6,
     stock = $7,
-    attributes = $8,
+    description = $8,
+    status = $9,
+    attributes = $10,
     updated_at = now()
 WHERE id = $1
 RETURNING *;
