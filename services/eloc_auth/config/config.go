@@ -16,6 +16,8 @@ type Config struct {
 }
 
 func LoadConfig(path string) (config Config, err error) {
+	viper.SetDefault("DB_DRIVER", "postgres")
+
 	viper.AddConfigPath(path)
 	viper.SetConfigName("app")
 	viper.SetConfigType("env")
