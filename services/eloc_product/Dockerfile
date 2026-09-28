@@ -14,7 +14,7 @@ WORKDIR /app
 
 COPY --from=builder /app/services/eloc_product/main .
 COPY --from=builder /app/services/eloc_product/migrate ./migrate
-# COPY --from=builder /app/services/eloc_product/app.env .
+COPY --from=builder /app/services/eloc_product/app.env .
 COPY services/eloc_product/db/migration ./db/migration
 
 COPY services/eloc_auth/start.sh .
