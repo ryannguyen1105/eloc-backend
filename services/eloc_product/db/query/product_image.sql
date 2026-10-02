@@ -4,7 +4,7 @@ INSERT INTO product_images (
 ) VALUES (
     $1, $2, $3
 )
-RETURNING id, product_id, image_url, is_primary;
+RETURNING *;
 
 -- name: GetProductImages :many
 SELECT id, product_id, image_url, is_primary

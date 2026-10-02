@@ -14,15 +14,15 @@ import (
 )
 
 type productResponse struct {
-	ID          int64          `json:"id"`
-	Name        string         `json:"name"`
-	Slug        string         `json:"slug"`
-	Sku         string         `json:"sku"`
-	Price       int64          `json:"price"`
-	Stock       int32          `json:"stock"`
-	Description string `json:"description"`
-	Status      string         `json:"status"`
-	CreatedAt   time.Time      `json:"created_at"`
+	ID          int64     `json:"id"`
+	Name        string    `json:"name"`
+	Slug        string    `json:"slug"`
+	Sku         string    `json:"sku"`
+	Price       int64     `json:"price"`
+	Stock       int32     `json:"stock"`
+	Description string    `json:"description"`
+	Status      string    `json:"status"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 func newProductResponse(product db.Product) productResponse {
@@ -40,11 +40,11 @@ func newProductResponse(product db.Product) productResponse {
 }
 
 type createProductRequest struct {
-	Name        string         `json:"name" binding:"required"`
-	Slug        string         `json:"slug" binding:"required"`
-	Sku         string         `json:"sku" binding:"required"`
-	Price       int64          `json:"price" binding:"required,min=1"`
-	Stock       int32          `json:"stock" binding:"required,min=1"`
+	Name        string `json:"name" binding:"required"`
+	Slug        string `json:"slug" binding:"required"`
+	Sku         string `json:"sku" binding:"required"`
+	Price       int64  `json:"price" binding:"required,min=1"`
+	Stock       int32  `json:"stock" binding:"required,min=1"`
 	Description string `json:"description" binding:"required"`
 }
 
@@ -129,14 +129,14 @@ func (server *Server) ListProduct(ctx *gin.Context) {
 }
 
 type updateProductResponse struct {
-	Name        string         `json:"name"`
-	Slug        string         `json:"slug"`
-	Sku         string         `json:"sku"`
-	Price       int64          `json:"price"`
-	Stock       int32          `json:"stock"`
-	Description string `json:"description"`
-	Status      string         `json:"status"`
-	UpdatedAt   time.Time      `json:"updated_at"`
+	Name        string    `json:"name"`
+	Slug        string    `json:"slug"`
+	Sku         string    `json:"sku"`
+	Price       int64     `json:"price"`
+	Stock       int32     `json:"stock"`
+	Description string    `json:"description"`
+	Status      string    `json:"status"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 func newUpdateProductResponse(product db.Product) updateProductResponse {
@@ -153,14 +153,14 @@ func newUpdateProductResponse(product db.Product) updateProductResponse {
 }
 
 type updateProductRequest struct {
-	CategoryID  int64          `json:"category_id" binding:"required,min=1"`
-	Name        string         `json:"name" binding:"required"`
-	Slug        string         `json:"slug" binding:"required"`
-	Sku         string         `json:"sku" binding:"required"`
-	Price       int64          `json:"price" binding:"required,min=1"`
-	Stock       int32          `json:"stock" binding:"required,min=1"`
+	CategoryID  int64  `json:"category_id" binding:"required,min=1"`
+	Name        string `json:"name" binding:"required"`
+	Slug        string `json:"slug" binding:"required"`
+	Sku         string `json:"sku" binding:"required"`
+	Price       int64  `json:"price" binding:"required,min=1"`
+	Stock       int32  `json:"stock" binding:"required,min=1"`
 	Description string `json:"description" binding:"required"`
-	Status      string         `json:"status" binding:"required"`
+	Status      string `json:"status" binding:"required"`
 }
 
 type updateProductGetIDRequest struct {
@@ -231,7 +231,7 @@ func (server *Server) updateProductStock(ctx *gin.Context) {
 }
 
 type deleteProductRequest struct {
-	ID int64 `json:"id" binding:"required,min=1"`
+	ID int64 `uri:"id" binding:"required,min=1"`
 }
 
 func (server *Server) deleteProduct(ctx *gin.Context) {
@@ -246,7 +246,7 @@ func (server *Server) deleteProduct(ctx *gin.Context) {
 	product, err := server.productService.DeleteProduct(ctx, dto)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))

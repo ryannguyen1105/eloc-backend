@@ -8,21 +8,28 @@ import (
 )
 
 type Server struct {
-	store          db.Store
-	productService *service.ProductService
-	router         *gin.Engine
+	store             db.Store
+	productService    *service.ProductService
+	cloudinaryService *service.CloudinaryService
+	router            *gin.Engine
 }
 
 func NewServer(store db.Store) (*Server, error) {
 	router := gin.Default()
 	productService := service.NewProductService(store)
 
+	cloudinaryService, err := service.NewCloudinaryService()
+	if err != nil {
+		return nil, err
+	}
+
 	router.Use(middleware.CORSMiddleware())
 
 	server := &Server{
-		store:          store,
-		productService: productService,
-		router:         router,
+		store:             store,
+		productService:    productService,
+		router:            router,
+		cloudinaryService: cloudinaryService,
 	}
 	server.setupRouter()
 	return server, nil
@@ -32,7 +39,7 @@ func (server *Server) setupRouter() {
 	categoryRouters := server.router.Group("/category")
 	{
 		categoryRouters.POST("", server.createCategory)
-		categoryRouters.GET("",server.getCategory)
+		categoryRouters.GET("", server.getCategory)
 		categoryRouters.DELETE("/delete", server.deleteCategory)
 	}
 
@@ -46,8 +53,11 @@ func (server *Server) setupRouter() {
 		productRouters.POST("", server.createProduct)
 		productRouters.GET("/:id", server.getProduct)
 		productRouters.PUT("/update/:id", server.updateProduct)
-		productRouters.PATCH("/updatestock",server.updateProductStock )
+		productRouters.PATCH("/updatestock", server.updateProductStock)
 		productRouters.DELETE("/delete", server.deleteProduct)
+
+		productRouters.POST("/:product_id/images", server.addProductImage)
+		productRouters.DELETE("/:id/:product_id", server.deleteProductImage)
 	}
 }
 

@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"log"
+	"os"
 
 	_ "github.com/lib/pq"
 	"github.com/ryannguyen1105/eloc-backend/services/eloc_product/config"
@@ -15,6 +16,8 @@ func main() {
 	if err != nil {
 		log.Fatal("cannot load config:", err)
 	}
+
+	os.Setenv("CLOUDINARY_URL", config.CloudinaryUrl)
 
 	conn, err := sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
