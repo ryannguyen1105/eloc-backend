@@ -203,24 +203,34 @@ func (server *Server) updateProduct(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, rsp)
 }
 
+type updateProductIDRequest struct {
+	ID int64 `uri:"id" binding:"required,min=1"`
+}
 type updateProductStockRequest struct {
-	ID    int64 `json:"id" binding:"required,min=1"`
 	Stock int32 `json:"stock" binding:"required,min=1"`
 }
 
 func (server *Server) updateProductStock(ctx *gin.Context) {
-	var req updateProductStockRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	var reqUri updateProductIDRequest
+	if err := ctx.ShouldBindUri(&reqUri); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
 	}
+
+	var reqStock updateProductStockRequest
+	if err := ctx.ShouldBindJSON(&reqStock); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
 	dto := service.UpdateProductStockDTO{
-		ID:    req.ID,
-		Stock: req.Stock,
+		ID:    reqUri.ID,
+		Stock: reqStock.Stock,
 	}
 	product, err := server.productService.UpdateProductStock(ctx, dto)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))

@@ -113,7 +113,7 @@ func TestDeleteProductImage(t *testing.T) {
 		ID:        image1.ID,
 		ProductID: product.ID,
 	}
-	err := testQueries.DeleteProductImage(context.Background(), deleteArg)
+	_, err := testQueries.DeleteProductImage(context.Background(), deleteArg)
 	require.NoError(t, err)
 
 	arg := GetProductImagesParams{

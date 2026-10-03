@@ -53,7 +53,7 @@ func (server *Server) setupRouter() {
 		productRouters.POST("", server.createProduct)
 		productRouters.GET("/:id", server.getProduct)
 		productRouters.PUT("/update/:id", server.updateProduct)
-		productRouters.PATCH("/updatestock", server.updateProductStock)
+		productRouters.PATCH("/updatestock/:id", server.updateProductStock)
 		productRouters.DELETE("/delete", server.deleteProduct)
 
 		productRouters.POST("/:product_id/images", server.addProductImage)

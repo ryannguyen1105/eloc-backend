@@ -356,6 +356,10 @@ const updateProductStock = `-- name: UpdateProductStock :one
 UPDATE products
 SET 
     stock = stock + $2,
+    status = CASE
+        WHEN (stock + $2) <= 0 THEN 'inactive'
+        ELSE 'active'
+    END,
     updated_at = now()
 WHERE id = $1
 RETURNING id, category_id, name, slug, sku, price, stock, description, status, attributes, created_at, updated_at

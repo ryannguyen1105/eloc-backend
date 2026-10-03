@@ -53,6 +53,10 @@ RETURNING *;
 UPDATE products
 SET 
     stock = stock + $2,
+    status = CASE
+        WHEN (stock + $2) <= 0 THEN 'inactive'
+        ELSE 'active'
+    END,
     updated_at = now()
 WHERE id = $1
 RETURNING *;
