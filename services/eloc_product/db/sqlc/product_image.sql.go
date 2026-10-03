@@ -36,9 +36,10 @@ func (q *Queries) AddProductImage(ctx context.Context, arg AddProductImageParams
 	return i, err
 }
 
-const deleteProductImage = `-- name: DeleteProductImage :exec
+const deleteProductImage = `-- name: DeleteProductImage :one
 DELETE FROM product_images
 WHERE id = $1 AND product_id = $2
+RETURNING id, product_id, image_url, is_primary
 `
 
 type DeleteProductImageParams struct {
@@ -46,9 +47,16 @@ type DeleteProductImageParams struct {
 	ProductID int64
 }
 
-func (q *Queries) DeleteProductImage(ctx context.Context, arg DeleteProductImageParams) error {
-	_, err := q.db.ExecContext(ctx, deleteProductImage, arg.ID, arg.ProductID)
-	return err
+func (q *Queries) DeleteProductImage(ctx context.Context, arg DeleteProductImageParams) (ProductImage, error) {
+	row := q.db.QueryRowContext(ctx, deleteProductImage, arg.ID, arg.ProductID)
+	var i ProductImage
+	err := row.Scan(
+		&i.ID,
+		&i.ProductID,
+		&i.ImageUrl,
+		&i.IsPrimary,
+	)
+	return i, err
 }
 
 const getProductImages = `-- name: GetProductImages :many

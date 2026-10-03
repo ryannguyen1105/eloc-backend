@@ -31,5 +31,5 @@ func (productService *ProductService) DeleteProductImage(ctx context.Context, dt
 		ID:        dto.ID,
 		ProductID: dto.ProductID,
 	}
-	return db.ProductImage{}, productService.store.DeleteProductImage(ctx, arg)
+	return productService.store.DeleteProductImage(ctx, arg)
 }

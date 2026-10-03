@@ -23,6 +23,7 @@ SET is_primary = true
 WHERE id = $1 AND product_id = $2
 RETURNING id, product_id, image_url, is_primary;
 
--- name: DeleteProductImage :exec
+-- name: DeleteProductImage :one
 DELETE FROM product_images
-WHERE id = $1 AND product_id = $2;
+WHERE id = $1 AND product_id = $2
+RETURNING *;
