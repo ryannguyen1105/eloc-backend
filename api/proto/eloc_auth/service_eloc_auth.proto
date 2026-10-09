@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package pb;
+
+import "eloc_auth/rpc_create_user.proto";
+import "eloc_auth/rpc_login_user.proto";
+
+option go_package = "github.com/ryannguyen1105/eloc-backend/services/eloc_auth/pb";
+
+service Eloc_Auth {
+  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse) {}
+  rpc LoginUser (LoginUserRequest) returns (LoginUserResponse) {}
+}

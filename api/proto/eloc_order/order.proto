@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/ryannguyen1105/eloc-backend/services/eloc_order/pb";
+
+message Order {
+  int64                     user_id         = 1;
+  int64                     total_amount    = 2;
+  string                    status          = 3;
+  string                    shpping_address = 4;
+  string                    customer_phone  = 5;
+  google.protobuf.Timestamp created_at      = 6;
+
+}

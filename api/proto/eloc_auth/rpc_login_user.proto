@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pb;
+
+import "eloc_auth/user.proto";
+
+option go_package = "github.com/ryannguyen1105/eloc-backend/services/eloc_auth/pb";
+
+message LoginUserRequest {
+  string email    = 1;
+  string password = 2;
+}
+
+message LoginUserResponse {
+  User   user          = 1;
+  string access_token  = 2;
+  string refresh_token = 3;
+}

@@ -3,11 +3,16 @@ package main
 import (
 	"database/sql"
 	"log"
+	"net"
 
 	_ "github.com/lib/pq"
+	pb "github.com/ryannguyen1105/eloc-backend/api/pb/eloc_order"
 	"github.com/ryannguyen1105/eloc-backend/services/eloc_order/config"
 	db "github.com/ryannguyen1105/eloc-backend/services/eloc_order/db/sqlc"
+	"github.com/ryannguyen1105/eloc-backend/services/eloc_order/gapi"
 	"github.com/ryannguyen1105/eloc-backend/services/eloc_order/internal/api"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 func main() {
@@ -21,7 +26,30 @@ func main() {
 	}
 
 	store := db.NewStore(conn)
-	runGinServer(config,store)
+	runGrpcServer(config, store)
+	// runGinServer(config, store)
+}
+
+func runGrpcServer(config config.Config, store db.Store) {
+	server, err := gapi.NewServer(config, store)
+	if err != nil {
+		log.Fatal("cannot create server", err)
+	}
+
+	grpcServer := grpc.NewServer()
+	pb.RegisterEloc_OrderServer(grpcServer, server)
+	reflection.Register(grpcServer)
+
+	listener, err := net.Listen("tcp", config.GRPCServerAddress)
+	if err != nil {
+		log.Fatal("cannot create listener")
+	}
+
+	log.Printf("start gRPC server at %s", listener.Addr().String())
+	err = grpcServer.Serve(listener)
+	if err != nil {
+		log.Fatal("cannot start gRPC server")
+	}
 }
 
 func runGinServer(config config.Config, store db.Store) {
@@ -29,7 +57,7 @@ func runGinServer(config config.Config, store db.Store) {
 	if err != nil {
 		log.Fatal("cannot create sever:", err)
 	}
-	err = server.Start(config.ServerAddress)
+	err = server.Start(config.HTTPServerAddress)
 	if err != nil {
 		log.Fatalf("cannot start server: %v", err)
 	}

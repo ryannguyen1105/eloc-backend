@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package pb;
+
+import "eloc_order/order.proto";
+
+option go_package = "github.com/ryannguyen1105/eloc-backend/services/eloc_order/pb";
+
+message createOrderRequest {
+  int64  user_id          = 1;
+  string shipping_address = 2;
+  string customer_phone   = 3;
+}
+
+message CreateOrderResponse {
+  Order order = 1;
+}

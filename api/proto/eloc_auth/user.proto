@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/ryannguyen1105/eloc-backend/services/eloc_auth/pb";
+
+message User {
+  string                    email       = 1;
+  string                    full_name   = 2;
+  bool                      is_active   = 3;
+  bool                      is_verified = 4;
+  google.protobuf.Timestamp created_at  = 5;
+  string                    role        = 6;
+}

@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package pb;
+
+import "eloc_order/rpc_create_cart.proto";
+import "eloc_order/rpc_get_cart.proto";
+import "eloc_order/rpc_update_quantity_cart.proto";
+
+import "eloc_order/rpc_create_order.proto";
+
+
+option go_package = "github.com/ryannguyen1105/eloc-backend/services/eloc_order/pb";
+
+service Eloc_Order {
+  rpc CreateCart (CreateCartRequest) returns (CreateCartResponse) {}
+  rpc GetCart (GetCartRequest) returns (GetCartResponse) {}
+  rpc UpdateCartQuantity (UpdateCartQuantityRequest) returns (UpdateCartQuantityResponse) {}
+
+  rpc CreateOrder (createOrderRequest) returns (CreateOrderResponse) {}
+}

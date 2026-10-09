@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package pb;
+
+import "eloc_order/cart.proto";
+
+option go_package = "github.com/ryannguyen1105/eloc-backend/services/eloc_order/pb";
+
+message GetCartRequest {
+  int64 user_id = 1;
+}
+
+message GetCartResponse {
+  Cart cart = 1;
+}

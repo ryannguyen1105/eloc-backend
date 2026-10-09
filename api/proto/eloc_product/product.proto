@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/ryannguyen1105/eloc-backend/services/eloc_product/pb";
+
+message Product {
+  string                    name        = 1;
+  string                    slug        = 2;
+  string                    sku         = 3;
+  int64                     price       = 4;
+  int32                     stock       = 5;
+  string                    description = 6;
+  string                    status      = 7;
+  google.protobuf.Timestamp created_at  = 8;
+}

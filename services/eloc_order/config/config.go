@@ -3,9 +3,10 @@ package config
 import "github.com/spf13/viper"
 
 type Config struct {
-	DBDriver      string `mapstructure:"DB_DRIVER"`
-	DBSource      string `mapstructure:"DB_SOURCE"`
-	ServerAddress string `mapstructure:"SERVER_ADDRESS"`
+	DBDriver          string `mapstructure:"DB_DRIVER"`
+	DBSource          string `mapstructure:"DB_SOURCE"`
+	HTTPServerAddress string `mapstructure:"HTTP_SERVER_ADDRESS"`
+	GRPCServerAddress string `mapstructure:"GRPC_SERVER_ADDRESS"`
 }
 
 func LoadConfig(path string) (config Config, err error) {
@@ -18,7 +19,7 @@ func LoadConfig(path string) (config Config, err error) {
 	if err != nil {
 		return
 	}
-	
+
 	viper.Unmarshal(&config)
 	return
 }

@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package pb;
+
+import "eloc_product/rpc_get_product.proto";
+
+option go_package = "github.com/ryannguyen1105/eloc-backend/services/eloc_product/pb";
+
+service Eloc_Product {
+  rpc GetProduct (GetProductRequest) returns (GetProductResponse) {}
+}

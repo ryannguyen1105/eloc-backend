@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package pb;
+
+import "eloc_product/product.proto";
+
+option go_package = "github.com/ryannguyen1105/eloc-backend/services/eloc_product/pb";
+
+message GetProductRequest {
+  int64 id = 1;
+}
+
+message GetProductResponse {
+  Product product = 1;
+}
