@@ -24,10 +24,9 @@ const (
 type CreateUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
-	FullName      string                 `protobuf:"bytes,2,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
-	IsActive      bool                   `protobuf:"varint,3,opt,name=is_active,json=isActive,proto3" json:"is_active,omitempty"`
-	IsVerified    bool                   `protobuf:"varint,4,opt,name=is_verified,json=isVerified,proto3" json:"is_verified,omitempty"`
-	Role          string                 `protobuf:"bytes,6,opt,name=role,proto3" json:"role,omitempty"`
+	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	FullName      string                 `protobuf:"bytes,3,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
+	Role          string                 `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -69,25 +68,18 @@ func (x *CreateUserRequest) GetEmail() string {
 	return ""
 }
 
+func (x *CreateUserRequest) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
 func (x *CreateUserRequest) GetFullName() string {
 	if x != nil {
 		return x.FullName
 	}
 	return ""
-}
-
-func (x *CreateUserRequest) GetIsActive() bool {
-	if x != nil {
-		return x.IsActive
-	}
-	return false
-}
-
-func (x *CreateUserRequest) GetIsVerified() bool {
-	if x != nil {
-		return x.IsVerified
-	}
-	return false
 }
 
 func (x *CreateUserRequest) GetRole() string {
@@ -145,14 +137,12 @@ var File_eloc_auth_rpc_create_user_proto protoreflect.FileDescriptor
 
 const file_eloc_auth_rpc_create_user_proto_rawDesc = "" +
 	"\n" +
-	"\x1feloc_auth/rpc_create_user.proto\x12\x02pb\x1a\x14eloc_auth/user.proto\"\x98\x01\n" +
+	"\x1feloc_auth/rpc_create_user.proto\x12\x02pb\x1a\x14eloc_auth/user.proto\"v\n" +
 	"\x11CreateUserRequest\x12\x14\n" +
-	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1b\n" +
-	"\tfull_name\x18\x02 \x01(\tR\bfullName\x12\x1b\n" +
-	"\tis_active\x18\x03 \x01(\bR\bisActive\x12\x1f\n" +
-	"\vis_verified\x18\x04 \x01(\bR\n" +
-	"isVerified\x12\x12\n" +
-	"\x04role\x18\x06 \x01(\tR\x04role\"2\n" +
+	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x1b\n" +
+	"\tfull_name\x18\x03 \x01(\tR\bfullName\x12\x12\n" +
+	"\x04role\x18\x04 \x01(\tR\x04role\"2\n" +
 	"\x12CreateUserResponse\x12\x1c\n" +
 	"\x04user\x18\x01 \x01(\v2\b.pb.UserR\x04userB>Z<github.com/ryannguyen1105/eloc-backend/services/eloc_auth/pbb\x06proto3"
 
