@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"log"
 	"net"
+	"net/http"
 
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	_ "github.com/lib/pq"
 	pb "github.com/ryannguyen1105/eloc-backend/api/pb/eloc_auth"
 	"github.com/ryannguyen1105/eloc-backend/services/eloc_auth/config"
@@ -26,7 +29,8 @@ func main() {
 	}
 
 	store := db.NewStore(conn)
-	// runGrpcServer(config, store)
+	go runGrpcGatewayServer(config, store)
+	runGrpcServer(config, store)
 	runGinServer(config, store)
 }
 
@@ -49,6 +53,37 @@ func runGrpcServer(config config.Config, store db.Store) {
 	err = grpcServer.Serve(listener)
 	if err != nil {
 		log.Fatal("cannot start gRPC server")
+	}
+}
+
+func runGrpcGatewayServer(config config.Config, store db.Store) {
+	server, err := gapi.NewServer(config, store)
+	if err != nil {
+		log.Fatal("cannot create server:", err)
+	}
+
+	grpcMux := runtime.NewServeMux()
+
+	ctx, cancle := context.WithCancel(context.Background())
+	defer cancle()
+
+	err = pb.RegisterEloc_AuthHandlerServer(ctx, grpcMux, server)
+	if err != nil {
+		log.Fatal("cannot register handler server")
+	}
+
+	mux := http.NewServeMux()
+	mux.Handle("/", grpcMux)
+
+	listener, err := net.Listen("tcp", config.HTTPServerAddress)
+	if err != nil {
+		log.Fatal("cannot create listener", err)
+	}
+
+	log.Printf("start HTTP gateway server at %s", listener.Addr().String())
+	err = http.Serve(listener, mux)
+	if err != nil {
+		log.Fatal("cannot start HTTP gateway server server:", err)
 	}
 }
 
